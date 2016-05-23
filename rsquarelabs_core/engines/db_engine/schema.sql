@@ -12,6 +12,7 @@ CREATE TABLE projects
        date           TEXT);
 CREATE TABLE project_activity
     ( id  INTEGER PRIMARY KEY     AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
     tool_name TEXT NOT NULL,
     step_no TEXT NOT NULL,
     step_name TEXT NOT NULL,
