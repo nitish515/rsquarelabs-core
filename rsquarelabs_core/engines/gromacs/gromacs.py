@@ -58,6 +58,7 @@ class ProteinLigMin(object):
         self.working_dir = kwargs.get('working_dir', './')
         self.verbose = kwargs.get('verbose', False)
         self.quiet = kwargs.get('quiet', False)
+        self.project_id = kwargs.get('project_id', None)
 
         # A user cant use both the verbose and the quiet flag together
         if self.verbose is True and self.quiet is True:
@@ -138,7 +139,9 @@ class ProteinLigMin(object):
             self.working_dir + "protein.gro -ignh -p " + \
             self.working_dir + "topol.top -i " + self.working_dir + \
             "posre.itp -ff gromos53a6 -water spc "
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        print command
+        print self.project_id
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
     def prepare_system(self):
         """
@@ -257,7 +260,7 @@ class ProteinLigMin(object):
         log_file = self.working_dir + "step-%s.log" % step_no
         command = editconf + " -f " + self.working_dir + "system.gro -o " + \
             self.working_dir + "newbox.gro -bt cubic -d 1 -c "
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         print ">STEP4 : Initiating Procedure to Solvate Complex"
         solvate = settings.g_prefix + "solvate"
@@ -267,8 +270,8 @@ class ProteinLigMin(object):
         command = solvate + " -cp " + self.working_dir + "newbox.gro -p " + \
             self.working_dir + "topol.top -cs spc216.gro -o " + \
             self.working_dir + "solv.gro   "
-        print command
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
     def write_em_mdp(self):
         """
@@ -315,13 +318,13 @@ class ProteinLigMin(object):
             self.working_dir + "solv.gro -p " + self.working_dir + \
             "topol.top -o " + self.working_dir + "ions.tpr -po " + \
             self.working_dir + "mdout.mdp > " + temp_log_file +" 2>&1"
-        print command
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         # calculating the charge of the system
         # TODO: What is this doing? word??? Better name!
         word = 'total'  # Your word
-        print "yo"
+
         with open(temp_log_file ) as f:
             for line in f:
                 if word in line:
@@ -348,7 +351,7 @@ class ProteinLigMin(object):
             command = genion + " -s " + self.working_dir + "ions.tpr -o " + \
                 self.working_dir + "solv_ions.gro -p " + self.working_dir + \
                 "topol.top -nname CL -nn " + str(charge) +  " << EOF\nSOL\nEOF"
-            run_process(step_no, step_name, command,TOOL_NAME, log_file)
+            run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         elif charge < 0:
             print "charge is negative"
@@ -361,7 +364,7 @@ class ProteinLigMin(object):
                 self.working_dir + "solv_ions.gro -p " + self.working_dir + \
                 "topol.top -pname NA -np " + str(-charge) +  " << EOF\nSOL\nEOF"
             print command
-            run_process(step_no, step_name, command,TOOL_NAME, log_file)
+            run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         elif charge == 0:
             print "System has Neutral charge , No adjustments Required :)"
@@ -415,7 +418,7 @@ class ProteinLigMin(object):
                 + "topol.top -o " + self.working_dir + "em.tpr -po " +\
                 self.working_dir + "mdout.mdp -maxwarn 3 "
             print command
-            run_process(step_no, step_name, command,TOOL_NAME, log_file)
+            run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
             step_no = "8"
             step_name = " Minimisation"
@@ -426,7 +429,7 @@ class ProteinLigMin(object):
                 "em.trr -e " + self.working_dir + "em.edr -x " + \
                 self.working_dir + "em.xtc -g " + self.working_dir + \
                 "em.log "
-            run_process(step_no, step_name, command,TOOL_NAME, log_file)
+            run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
         else:
             print "Exiting on user request "
             sys.exit()
@@ -445,7 +448,7 @@ class ProteinLigMin(object):
             "topol.top -o " + self.working_dir + "nvt.tpr -po " + \
             self.working_dir + "mdout.mdp -maxwarn 3 > " + \
             self.working_dir + "step9.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         step_no = "10"
         step_name = "NVT Equiliberation"
@@ -454,7 +457,7 @@ class ProteinLigMin(object):
             + self.working_dir + "nvt.edr -x " + self.working_dir + \
             "nvt.xtc -g " + self.working_dir + "nvt.log > " + self.working_dir\
             + "step10.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
     def npt(self):
         print ">STEP11 : Initiating the Procedure to Equiliberate the System"
@@ -469,7 +472,7 @@ class ProteinLigMin(object):
             "topol.top -o " + self.working_dir + "npt.tpr -po " + \
             self.working_dir + "mdout.mdp -maxwarn 3 > " + self.working_dir + \
             "step11.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         step_no = "12"
         step_name = "NPT Equiliberation"
@@ -478,7 +481,7 @@ class ProteinLigMin(object):
             "npt.trr -e " + self.working_dir + "npt.edr -x " + \
             self.working_dir + "npt.xtc -g " + self.working_dir + "npt.log > "\
             + self.working_dir + "step12.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
     def md(self):
         print "CHEERS :) WE ARE CLOSE TO SUCCESS :):)"
@@ -493,7 +496,7 @@ class ProteinLigMin(object):
             "topol.top -o " + self.working_dir + "md.tpr -po " + \
             self.working_dir + "mdout.mdp -maxwarn 3 > " + self.working_dir + \
             "step13.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         step_no = "14"
         step_name = "NPT Equiliberation"
@@ -502,7 +505,7 @@ class ProteinLigMin(object):
             self.working_dir + "md.edr -x " + self.working_dir + "md.xtc -g " +\
             self.working_dir + "md.log > " + self.working_dir + \
             "step14.log 2>&1"
-        run_process(step_no, step_name, command,TOOL_NAME, log_file)
+        run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
     """
 
 if __name__ == '__main__':

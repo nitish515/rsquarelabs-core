@@ -63,32 +63,18 @@ def docs():
 
 @app.route('/websuite/projects.html')
 def projects_list():
-    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects")
+    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects", ())
     content =  open(os.path.join(HTML_DIR, 'projects.html')).read()
     return template(content, projects_list=projects_data,now=now)
 
 
 @app.route('/websuite/project/:project_id')
 def projects_view(project_id):
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = %s"%(int(project_id))).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id)).fetchone()
+
     #TODO = filter by project_id
-
-    # Filter by project id.
-    qs_string = request.query_string
-
-    id_number = None
-
-    if 'filter_id=' in qs_string:
-        id_number = qs_string.split('filter_id=')[1].split('&')[0].replace("%20", ' ')
-
-    if id_number:
-        id_number += '%'
-        project_activity_data = db_object.cur.execute(
-            "select id, project_id, tool_name, step_no, step_name, command, pid from project_activity where project_id LIKE ? ORDER BY id DESC",
-            (id_number,))
-    else:
-        project_activity_data = db_object.do_select(
-            "select id, project_id, tool_name, step_no, step_name, command, pid from project_activity ORDER BY id DESC")
+    project_activity_data = db_object.do_select(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,))
 
 
     if project_data is None:
@@ -110,33 +96,28 @@ def projects_view(project_id):
 
 @app.route('/websuite/project/:project_id/activity')
 def activity(project_id):
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = %s" % (int(project_id))).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id)).fetchone()
 
     qs_string = request.query_string
 
     # Filter by command name and project id.
     command_name = None
-    id_number = None
+
 
     if 'filter_command=' in qs_string:
         command_name = qs_string.split('filter_command=')[1].split('&')[0].replace("%20", ' ')
-    elif 'filter_id=' in qs_string:
-        id_number = qs_string.split('filter_id=')[1].split('&')[0].replace("%20", ' ')
+
 
     filter_commands = ['gmx pdb2gmx', 'gmx editconf', 'gmx solvate', 'gmx grompp', 'gmx genion', 'gmx mdrun', 'gmx genrestr']
 
     if command_name:
         command_name += '%'
         project_activity_data = db_object.cur.execute(
-            "select id, project_id, tool_name, step_no, step_name, command, pid from project_activity where command LIKE ? ORDER BY id DESC",(command_name,))
-    elif id_number:
-        id_number += '%'
-        project_activity_data = db_object.cur.execute(
-            "select id, project_id, tool_name, step_no, step_name, command, pid from project_activity where project_id LIKE ? ORDER BY id DESC",
-            (id_number,))
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id= ? and command LIKE ? ORDER BY id DESC",(project_id, command_name,))
+
     else:
         project_activity_data = db_object.do_select(
-            "select id, project_id, tool_name, step_no, step_name, command, pid from project_activity ORDER BY id DESC")
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  where  project_id= ?  ORDER BY id DESC", (project_id))
 
     content = open(os.path.join(HTML_DIR, 'project-status.html')).read()
     return template(content, filter_commands=filter_commands, project_activity_data=project_activity_data.fetchall(), project_data=project_data, now=now)
