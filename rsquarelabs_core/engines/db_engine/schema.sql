@@ -19,6 +19,7 @@ CREATE TABLE project_activity
     pid TEXT,
     status TEXT NOT NULL,
     log_file TEXT NOT NULL,
+    project_id INTEGER NOT NULL,
     created_at TEXT,
     updated_at TEXT);
 CREATE TABLE project_files

@@ -25,7 +25,7 @@ def check_process():
     pass
 
 
-def run_process(step_no, step_name, command, tool_name, log_file):
+def run_process(step_no, step_name, command, tool_name, log_file, project_id):
     """
     This method will
     step1: save the incoming command request info into db
@@ -37,6 +37,7 @@ def run_process(step_no, step_name, command, tool_name, log_file):
     and also we use the last of this step no from the records as the final command that worked for the user :) )
     :param step_name: Step name in the workflow - an identifier
     :param command: the command to execute
+    :param project_id: id of project (this helps for filtering in project status)
     :return:
     """
     logger.info( "INFO: Attempting to execute " + step_name + " [STEP:" + step_no + "]")
@@ -69,8 +70,9 @@ def run_process(step_no, step_name, command, tool_name, log_file):
 
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
-        cmd = 'INSERT INTO project_activity (tool_name,step_no, step_name , command, status, log_file, created_at )\
-         VALUES( "%s",%s,"%s","%s","%s","%s","%s")'% (tool_name, int(step_no), step_name, command, "to_run", log_file, str(datetime.now()) )
+        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at )\
+         VALUES("%s",%s,"%s","%s","%s","%s", %s, "%s")'% (tool_name, int(step_no), step_name, command, "to_run", log_file, int(project_id), str(datetime.now()) )
+
 
         cur = db_object.do_insert(cmd)
         logger.debug(cur)
@@ -78,7 +80,7 @@ def run_process(step_no, step_name, command, tool_name, log_file):
         fh_stdout = open(log_file, 'wb')
         fh_stderr = open("%s.err"%log_file, 'wb')
         process = subprocess.Popen(cmd_args, stdout=fh_stdout, stderr=fh_stderr)
-        print process.pid
+
         logger.info("Runing the stepNo: %s, StepName: %s with process id %s"%(step_no, step_name, process.pid))
         ret = process.poll()
 

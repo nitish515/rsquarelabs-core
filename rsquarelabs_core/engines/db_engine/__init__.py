@@ -40,9 +40,9 @@ class DBEngine:
         self.cur = self.conn.cursor()
         return self.conn
 
-    def do_select(self, cmd):
+    def do_select(self, cmd, params):
 
-        data = self.cur.execute(cmd)
+        data = self.cur.execute(cmd, params)
         return data
 
     def do_insert(self, cmd):

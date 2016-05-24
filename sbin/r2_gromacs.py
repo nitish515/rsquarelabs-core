@@ -93,23 +93,26 @@ def main():
     files_list = os.listdir(CURRENT_PATH)
     is_config_file_avaliable = False
 
+
     for file in files_list:
         if file == "r2_gromacs.config":
             is_config_file_avaliable = True
             project_key = CURRENT_PATH.split('/')[-1]
-            project_id = db_object.do_select("select id from projects where slug='%s'"%project_key).fetchone()[0]
+            project_id = db_object.do_select("select id from projects where slug= ?", (project_key, )).fetchone()[0]
 
 
+    if not 'init' in cmdargs:
 
-    # Creating a object to the ProteinLigMin class
-    obj = ProteinLigMin(
-        ligand_file='ligand.gro',
-        ligand_topology_file='ligand.itp',
-        protein_file='protein.pdb',
-        working_dir="%s/"%CURRENT_PATH,
-        verbose=True,
-        quiet=False
-    )
+        # Creating a object to the ProteinLigMin class
+        obj = ProteinLigMin(
+            ligand_file='ligand.gro',
+            ligand_topology_file='ligand.itp',
+            protein_file='protein.pdb',
+            working_dir="%s/"%CURRENT_PATH,
+            verbose=True,
+            quiet=False,
+            project_id=project_id
+        )
 
     #
     if 'init' in cmdargs:
