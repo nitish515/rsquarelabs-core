@@ -63,7 +63,7 @@ def docs():
 
 @app.route('/websuite/projects.html')
 def projects_list():
-    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects")
+    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects", ())
     content =  open(os.path.join(HTML_DIR, 'projects.html')).read()
     return template(content, projects_list=projects_data,now=now)
 
@@ -71,24 +71,56 @@ def projects_list():
 @app.route('/websuite/project/:project_id/activiy')
 def projects_view(project_id):
 
-
-
-
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = %s"%(int(project_id))).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id)).fetchone()
     #TODO = filter by project_id
-    project_activity_data  = db_object.do_select("select id, tool_name, step_no, step_name, command, pid from project_activity ORDER BY id DESC")
+    project_activity_data = db_object.do_select(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,))
+
+
     if project_data is None:
         project_log= None
         project_config = None
-        file_list = None
+        file_list_filter = None
         project_activity_data = None
     else:
         project_log = open(project_data[8], 'r').read()
         project_config = open(project_data[9], 'r').read()
         file_list = os.listdir(project_data[7])
+        file_list_filter = []
+        for file in file_list:
+            if not file.startswith("#") and not file.endswith("#"):
+                file_list_filter.append(file)
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    return template(content, file_list=file_list, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data, now=now)
+    return template(content, file_list=file_list_filter, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data, now=now)
 
+
+@app.route('/websuite/project/:project_id/activity')
+def activity(project_id):
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id)).fetchone()
+
+    qs_string = request.query_string
+
+    # Filter by command name and project id.
+    command_name = None
+
+
+    if 'filter_command=' in qs_string:
+        command_name = qs_string.split('filter_command=')[1].split('&')[0].replace("%20", ' ')
+
+
+    filter_commands = ['gmx pdb2gmx', 'gmx editconf', 'gmx solvate', 'gmx grompp', 'gmx genion', 'gmx mdrun', 'gmx genrestr']
+
+    if command_name:
+        command_name += '%'
+        project_activity_data = db_object.cur.execute(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id= ? and command LIKE ? ORDER BY id DESC",(project_id, command_name,))
+
+    else:
+        project_activity_data = db_object.do_select(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  where  project_id= ?  ORDER BY id DESC", (project_id))
+
+    content = open(os.path.join(HTML_DIR, 'project-status.html')).read()
+    return template(content, filter_commands=filter_commands, project_activity_data=project_activity_data.fetchall(), project_data=project_data, now=now)
 
 
 @app.route('/docs/filebrowser')

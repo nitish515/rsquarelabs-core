@@ -36,18 +36,19 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
-                <h4>Project Files(in directory) </h4>
-                <ol>
-                % for file in file_list:
-                    <li><a href="#{{file}}">{{file}}</a></li>
-                % end
-                </ol>
 
+            <div class="col-md-12">
 
+                <ul  class="list-inline">
+                    <li><strong>Filters:</strong></li>
+                    % for command in filter_commands:
+                    <li><a href="?filter_command={{command}}">{{command}}</a></li>
+                    % end
+                </ul>
             </div>
-            <div class="col-md-6">
-                <h4>Project Activity <small><a href="/websuite/project/{{project_data[0]}}/activity">seeall</a></small>  </h4>
+
+            <div class="col-md-12">
+                <h4>Project Activity</h4>
                  <ul>
                 % for activity in project_activity_data:
                     <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong>{{activity[2]}}, <strong>StepName:</strong>{{activity[3]}}, <strong>PID:</strong>{{activity[5]}} <pre>{{activity[4]}}</pre></li>
@@ -60,18 +61,7 @@
 
 
 
-        %if project_log == None:
-            <p>Unable to read project log file.</p>
-        %else:
-            <pre>{{project_log}}</pre>
-        %end
 
-
-        % if project_config == None:
-            <p>Unable to read the project config file.</p>
-        %else:
-            <pre>{{project_config}}</pre>
-        %end
 
     % else:
 

@@ -70,7 +70,9 @@ def current_date():
     :return: returns (str) date and time.
     """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-def show_comands():
+
+
+def show_commands():
     """
 
     This method provides commands for processing the project using gromacs tool and prints the available commands
@@ -91,23 +93,26 @@ def main():
     files_list = os.listdir(CURRENT_PATH)
     is_config_file_avaliable = False
 
+
     for file in files_list:
         if file == "r2_gromacs.config":
             is_config_file_avaliable = True
             project_key = CURRENT_PATH.split('/')[-1]
-            project_id = db_object.do_select("select id from projects where slug='%s'"%project_key).fetchone()[0]
+            project_id = db_object.do_select("select id from projects where slug= ?", (project_key, )).fetchone()[0]
 
 
+    if not 'init' in cmdargs:
 
-    # Creating a object to the ProteinLigMin class
-    obj = ProteinLigMin(
-        ligand_file='ligand.gro',
-        ligand_topology_file='ligand.itp',
-        protein_file='protein.pdb',
-        working_dir="%s/"%CURRENT_PATH,
-        verbose=True,
-        quiet=False
-    )
+        # Creating a object to the ProteinLigMin class
+        obj = ProteinLigMin(
+            ligand_file='ligand.gro',
+            ligand_topology_file='ligand.itp',
+            protein_file='protein.pdb',
+            working_dir="%s/"%CURRENT_PATH,
+            verbose=True,
+            quiet=False,
+            project_id=project_id
+        )
 
     #
     if 'init' in cmdargs:
@@ -213,7 +218,7 @@ Project created with id '%s',
 
 
     elif 'help' in cmdargs:
-        show_comands()
+        show_commands()
 
     elif 'importfiles' in cmdargs:
         if is_config_file_avaliable:
@@ -243,7 +248,7 @@ Project created with id '%s',
 
     else:
         print "ERROR: "
-        show_comands()
+        show_commands()
 
 
 
