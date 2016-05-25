@@ -68,8 +68,12 @@ def projects_list():
     return template(content, projects_list=projects_data,now=now)
 
 
-@app.route('/websuite/project/:project_id')
+@app.route('/websuite/project/:project_id/activiy')
 def projects_view(project_id):
+
+
+
+
     project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = %s"%(int(project_id))).fetchone()
     #TODO = filter by project_id
     project_activity_data  = db_object.do_select("select id, tool_name, step_no, step_name, command, pid from project_activity ORDER BY id DESC")
@@ -99,6 +103,8 @@ def filebrowser():
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     return template(content, files_data = files, folder_name = folder_name, folder_path= folder_path,now=now )
 
+
+filter_commands = ['gmx pdb2gmx', 'gmx editconf']
 
 @app.error(404)
 def error404(error):
