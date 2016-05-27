@@ -318,7 +318,7 @@ class ProteinLigMin(object):
             self.working_dir + "solv.gro -p " + self.working_dir + \
             "topol.top -o " + self.working_dir + "ions.tpr -po " + \
             self.working_dir + "mdout.mdp > " + temp_log_file +" 2>&1"
-
+        print command
         run_process(step_no, step_name, command,TOOL_NAME, log_file, self.project_id)
 
         # calculating the charge of the system

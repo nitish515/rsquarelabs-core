@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>RMV | RSQUARE LABS Automator </title>
+</head>
+<body>
+% include('header.html')
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Protocols</h1>
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Protocol ID</th>
+                        <th>Protocol name</th>
+                        <th>Protocol version</th>
+                        <th>Reference Protocol</th>
+                        <th>Protocol data</th>
+                        <th>Import</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    %for protocol in protocol_list:
+                        <tr>
+                            <td>{{protocol[0]}}</td>
+                            <td>{{protocol[1]}}</td>
+                            <td>{{protocol[2]}}</td>
+                            <td>{{protocol[3]}}</td>
+                            <td>{{protocol[4]}}</td>
+                            <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}">import</a></td>
+                        </tr>
+                    %end
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

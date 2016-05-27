@@ -22,19 +22,60 @@ db_object = DBEngine(RSQ_DB_PATH)
 
 app = Bottle()
 now = datetime.now().strftime("%Y %b, %d %H:%M:%S %p")
-bottle2.TEMPLATE_PATH.insert(0,HTML_DIR)
+bottle2.TEMPLATE_PATH.insert(0, HTML_DIR)
 
 
-@app.route('/websuite/rmv.html')
-def rmv():
+@app.route('/websuite/automator.html')
+def automator():
     qs_string = request.query_string
-    file_name = None
-    if 'file=' in qs_string:
-        file_name = qs_string.split('file=')[1].split('&')[0]
-        print file_name
-    content = open(os.path.join(HTML_DIR, 'rmv.html')).read()
-    return template(content, file_name=file_name,now=now)
+    # pro_ver = 1
+    pro_id = None
+    protocol_initial_data = None
 
+    if "pro_id=" in qs_string:
+        pro_id = qs_string.split('pro_id=')[1].split('&')[0]
+        #reference_protocol = pro_id
+        #pro_ver = int(pro_ver)+1
+    print pro_id
+    if pro_id:
+        protocol_initial_data = db_object.do_select("SELECT id, name, version, reference_protocol, protocol_data from protocols WHERE id =?",
+                                                    (pro_id,)).fetchone()
+    new_version = db_object.do_select("SELECT MAX(version) from protocols WHERE reference_protocol=?", (pro_id, )).fetchone()[0]
+    print new_version
+
+    if new_version:
+        new_version = int(new_version) + 1
+    else:
+        new_version = 1
+
+    content = open(os.path.join(HTML_DIR, 'automator.html')).read()
+    return template(content, protocol_initial_data=protocol_initial_data, new_version=new_version, now=now)
+
+@app.route('/websuite/automator.html', method='POST')
+def automator_insert():
+    name = request.forms.get("name")
+    version = request.forms.get("version")
+    protocol_data = request.forms.get("protocol_data")
+
+    qs_string = request.query_string
+    pro_id = None
+    reference_protocol = 0
+
+    if "pro_id=" in qs_string:
+        pro_id = qs_string.split('pro_id=')[1].split('&')[0]
+        reference_protocol = int(pro_id)
+
+
+    db_object.do_insert(" INSERT INTO protocols (name, version, reference_protocol, protocol_data)\
+                        VALUES ('%s', '%s', '%s', '%s')" % (name, version, reference_protocol, protocol_data))
+
+    redirect('/websuite/automator.html')
+
+@app.route('/websuite/protocols.html')
+def protocols():
+    protocol_list = db_object.do_select("SELECT id, name, version, reference_protocol, protocol_data from protocols", ())
+    content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
+    return template(content,protocol_list=protocol_list,now=now)
 
 @app.route('/index')
 @app.route('/home')
