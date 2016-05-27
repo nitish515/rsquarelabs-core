@@ -29,3 +29,9 @@ CREATE TABLE project_files
     project_id INTEGER NOT NULL,
     created_at TEXT,
     updated_at TEXT);
+CREATE TABLE protocols
+    (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    version INT,
+    reference_protocol INT,
+    protocol_data TEXT NOT NULL)
