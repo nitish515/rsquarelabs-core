@@ -92,15 +92,6 @@ def index():
     content = open(os.path.join(HTML_DIR, 'websuite_index.html')).read()
     return template(content, now=now)
 
-@app.route('/docs/rmv')
-def goto_rmv():
-    redirect('/docs/rmv.html')
-
-@app.route('/docs/rmv.html')
-def docs():
-    content =  open(os.path.join(DOCS_DIR, 'rmv.html')).read()
-    return template(content,now=now)
-
 
 @app.route('/websuite/projects.html')
 def projects_list():
@@ -164,17 +155,8 @@ def activity(project_id):
     return template(content, filter_commands=filter_commands, project_activity_data=project_activity_data.fetchall(), project_data=project_data, now=now)
 
 
-@app.route('/docs/filebrowser')
-def goto_filebrowser():
-    redirect('/docs/filebrowser.html')
 
-@app.route('/websuite/filebrowser.html')
-def filebrowser():
-    content = open(os.path.join(HTML_DIR, 'file_browser.html')).read()
-    folder_path = os.path.dirname(__file__)
-    folder_name = os.path.split(folder_path)[1]
-    files = [f for f in os.listdir('.') if os.path.isfile(f)]
-    return template(content, files_data = files, folder_name = folder_name, folder_path= folder_path,now=now )
+
 
 
 filter_commands = ['gmx pdb2gmx', 'gmx editconf']
