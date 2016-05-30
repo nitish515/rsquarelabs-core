@@ -21,12 +21,15 @@ from rsquarelabs_core.config import RSQ_DB_PATH
 db_object = DBEngine(RSQ_DB_PATH)
 
 app = Bottle()
-now = datetime.now().strftime("%Y %b, %d %H:%M:%S %p")
+
+footer_timeformat = "%Y %b, %d %H:%M:%S %p"
+
 bottle2.TEMPLATE_PATH.insert(0, HTML_DIR)
 
 
 @app.route('/websuite/automator.html')
 def automator():
+    now = datetime.now().strftime(footer_timeformat)
     qs_string = request.query_string
     # pro_ver = 1
     pro_id = None
@@ -53,6 +56,7 @@ def automator():
 
 @app.route('/websuite/automator.html', method='POST')
 def automator_insert():
+    now = datetime.now().strftime(footer_timeformat)
     name = request.forms.get("name")
     version = request.forms.get("version")
     protocol_data = request.forms.get("protocol_data")
@@ -73,6 +77,7 @@ def automator_insert():
 
 @app.route('/websuite/protocols.html')
 def protocols():
+    now = datetime.now().strftime(footer_timeformat)
     protocol_list = db_object.do_select("SELECT id, name, version, reference_protocol, protocol_data from protocols", ())
     content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
     return template(content,protocol_list=protocol_list,now=now)
@@ -82,19 +87,20 @@ def protocols():
 @app.route('/')
 @app.route('/websuite')
 def goto_index():
+    now = datetime.now().strftime(footer_timeformat)
     redirect('/websuite/index.html')
 
 
 @app.route('/websuite/index.html')
 def index():
-    print HTML_DIR
-    print BASE_DIR
+    now = datetime.now().strftime(footer_timeformat)
     content = open(os.path.join(HTML_DIR, 'websuite_index.html')).read()
     return template(content, now=now)
 
 
 @app.route('/websuite/projects.html')
 def projects_list():
+    now = datetime.now().strftime(footer_timeformat)
     projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects", ())
     content =  open(os.path.join(HTML_DIR, 'projects.html')).read()
     return template(content, projects_list=projects_data,now=now)
@@ -102,6 +108,7 @@ def projects_list():
 
 @app.route('/websuite/project/:project_id/activiy')
 def projects_view(project_id):
+    now = datetime.now().strftime(footer_timeformat)
 
     project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id)).fetchone()
     #TODO = filter by project_id
@@ -128,8 +135,9 @@ def projects_view(project_id):
 
 @app.route('/websuite/project/:project_id/activity')
 def activity(project_id):
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id)).fetchone()
+    now = datetime.now().strftime(footer_timeformat)
 
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id)).fetchone()
     qs_string = request.query_string
 
     # Filter by command name and project id.
@@ -163,6 +171,7 @@ filter_commands = ['gmx pdb2gmx', 'gmx editconf']
 
 @app.error(404)
 def error404(error):
+    now = datetime.now().strftime(footer_timeformat)
     content = open(os.path.join(HTML_DIR, '404_error.html')).read()
     return template(content)
 

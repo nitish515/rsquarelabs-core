@@ -22,13 +22,15 @@ color:white;
 color:white;
 }
 
+.pageview{
+min-height:85%;
+}
 
 .footer {
 border-top:1px solid #efefef;
 padding-top:5px;
 padding-bottom:5px;
-position:fixed;
-bottom:0;
+
 width:100%;
 }
 html, body {
