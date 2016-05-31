@@ -2,6 +2,7 @@ __author__ = 'rrmerugu'
 
 import os, sys
 from datetime import datetime
+from time import time
 import bottle as bottle2
 from bottle import Bottle, request, static_file, template, redirect
 
@@ -16,7 +17,7 @@ JS_DIR      = os.path.join(STATIC_DIR, 'js')
 
 from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
-from rsquarelabs_core.config import RSQ_DB_PATH
+from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH
 
 db_object = DBEngine(RSQ_DB_PATH)
 
@@ -37,19 +38,25 @@ def automator():
 
     if "pro_id=" in qs_string:
         pro_id = qs_string.split('pro_id=')[1].split('&')[0]
-        #reference_protocol = pro_id
-        #pro_ver = int(pro_ver)+1
+
     print pro_id
     if pro_id:
-        protocol_initial_data = db_object.do_select("SELECT id, name, version, reference_protocol, protocol_data from protocols WHERE id =?",
+        protocol_initial_data = db_object.do_select("SELECT id, name, version, parent_protocol, master_protocol, protocol_data from protocols WHERE id =?",
                                                     (pro_id,)).fetchone()
-    new_version = db_object.do_select("SELECT MAX(version) from protocols WHERE reference_protocol=?", (pro_id, )).fetchone()[0]
+    new_version = db_object.do_select("SELECT MAX(version) from protocols WHERE parent_protocol=?", (pro_id, )).fetchone()[0]
     print new_version
+    print type(new_version)
 
-    if new_version:
+    if new_version != None:
         new_version = int(new_version) + 1
     else:
-        new_version = 1
+        if pro_id != None:
+            if protocol_initial_data[3] == 0:
+                new_version = 2
+            else:
+                new_version = 1
+        else:
+            new_version = 1
 
     content = open(os.path.join(HTML_DIR, 'automator.html')).read()
     return template(content, protocol_initial_data=protocol_initial_data, new_version=new_version, now=now)
@@ -63,24 +70,52 @@ def automator_insert():
 
     qs_string = request.query_string
     pro_id = None
-    reference_protocol = 0
+    master_protocol = 0
+    parent_protocol = 0
 
     if "pro_id=" in qs_string:
         pro_id = qs_string.split('pro_id=')[1].split('&')[0]
-        reference_protocol = int(pro_id)
+
+        master_protocol = db_object.do_select("SELECT master_protocol from protocols WHERE id=?", (pro_id,)).fetchone()[0]
+        parent_protocol = pro_id
+
+        if master_protocol == 0:
+            master_protocol = pro_id
 
 
-    db_object.do_insert(" INSERT INTO protocols (name, version, reference_protocol, protocol_data)\
-                        VALUES ('%s', '%s', '%s', '%s')" % (name, version, reference_protocol, protocol_data))
+    is_delete = 0
+
+    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete)\
+                        VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (name, version, parent_protocol, master_protocol, protocol_data, int(is_delete)))
+
+    protocol_id = db_object.cur.lastrowid
+
+    file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s.py" % (protocol_id, version, time()))
+    print file_name
+    fh = open(file_name, 'w')
+    fh.write(protocol_data)
 
     redirect('/websuite/automator.html')
 
 @app.route('/websuite/protocols.html')
 def protocols():
     now = datetime.now().strftime(footer_timeformat)
-    protocol_list = db_object.do_select("SELECT id, name, version, reference_protocol, protocol_data from protocols", ())
+
+    qs_string = request.query_string
+    protocol_id = None
+
+    if "protocol_id=" in qs_string:
+        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
+
+
+    if protocol_id != None:
+        db_object.cur.execute("UPDATE protocols SET is_delete = 1 WHERE id= ?", (protocol_id,))
+
+    protocol_list = db_object.do_select("SELECT id, name, version, parent_protocol , master_protocol, protocol_data, is_delete from protocols", ())
+
     content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
     return template(content,protocol_list=protocol_list,now=now)
+
 
 @app.route('/index')
 @app.route('/home')

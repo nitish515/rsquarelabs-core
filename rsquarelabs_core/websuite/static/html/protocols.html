@@ -21,21 +21,25 @@
                         <th>Protocol ID</th>
                         <th>Protocol name</th>
                         <th>Protocol version</th>
-                        <th>Reference Protocol</th>
+                        <th>Parent Protocol</th>
+                        <th>Master Protocol</th>
                         <th>Protocol data</th>
-                        <th>Import</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     %for protocol in protocol_list:
-                        <tr>
-                            <td>{{protocol[0]}}</td>
-                            <td>{{protocol[1]}}</td>
-                            <td>{{protocol[2]}}</td>
-                            <td>{{protocol[3]}}</td>
-                            <td>{{protocol[4]}}</td>
-                            <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}">import</a></td>
-                        </tr>
+                        %if protocol[6] == 0:
+                            <tr>
+                                <td>{{protocol[0]}}</td>
+                                <td>{{protocol[1]}}</td>
+                                <td>{{protocol[2]}}</td>
+                                <td>{{protocol[3]}}</td>
+                                <td>{{protocol[4]}}</td>
+                                <td>{{protocol[5]}}</td>
+                                <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}" class=" btn btn-default">import</a> <a href="/websuite/protocols.html?protocol_id={{protocol[0]}}" class="btn btn-danger" role="button">delete</a></td>
+                            </tr>
+                        %end
                     %end
                 </tbody>
             </table>
