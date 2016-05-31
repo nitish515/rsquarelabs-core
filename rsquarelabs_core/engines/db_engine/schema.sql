@@ -33,5 +33,7 @@ CREATE TABLE protocols
     (id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     version INT,
-    reference_protocol INT,
-    protocol_data TEXT NOT NULL)
+    parent_protocol INT,
+    master_protocol INT,
+    protocol_data TEXT NOT NULL,
+    is_delete INT)
