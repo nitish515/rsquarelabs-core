@@ -130,7 +130,7 @@ def main():
         project_data["slug"] = ""
         project_data["path"] = ""
         project_data["type"] = TOOL_NAME
-
+        is_delete = 0
 
 
         while( project_data["title"].lstrip() == ""):
@@ -167,9 +167,9 @@ def main():
         if os.path.exists(PROJECT_PATH):
             while(os.path.exists(PROJECT_PATH)):
                 project_data["slug"] = raw_input("Project with project key exists, Enter new key for the project : ")
-            project_data["slug"] = project_data["slug"].replace(" ","-").replace("_","-")\
-            .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-').replace(":","-").replace("--","-")
-            PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_data["slug"])
+                project_data["slug"] = project_data["slug"].replace(" ","-").replace("_","-")\
+                .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-').replace(":","-").replace("--","-")
+                PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_data["slug"])
             os.mkdir(PROJECT_PATH, 0755)
         else:
             os.mkdir(PROJECT_PATH, 0755)
@@ -183,8 +183,8 @@ def main():
 
 
 
-        cur = db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date)\
-                        VALUES('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s')"
+        cur = db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date, is_delete)\
+                        VALUES('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s')"
                         % (project_data["title"],
                            project_data["tags"],
                            project_data["user_email"],
@@ -195,6 +195,7 @@ def main():
                            project_data["log"],
                            project_data["type"],
                            project_data["date"],
+                           int(is_delete),
                            ))
 
         if cur.lastrowid: # if created into db

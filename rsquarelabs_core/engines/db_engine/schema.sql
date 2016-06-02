@@ -9,7 +9,8 @@ CREATE TABLE projects
        config         TEXT,
        log            TEXT,
        type           TEXT,
-       date           TEXT);
+       date           TEXT,
+       is_delete      INT);
 CREATE TABLE project_activity
     ( id  INTEGER PRIMARY KEY     AUTOINCREMENT,
     tool_name TEXT NOT NULL,
