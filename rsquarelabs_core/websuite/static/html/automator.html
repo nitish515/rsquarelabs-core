@@ -34,12 +34,8 @@
                         </div>
 
                         <div class="col-md-5">
-                            <label for="version">Protocol version:</label>
-                            %if protocol_initial_data ==None:
-                                <input type="text" class="form-control" name="version" id="version" value="1">
-                            %else:
-                                <input type="text" class="form-control" value="{{new_version}}" disabled="disabled" name="version" id="version">
-                            %end
+                            <label for="version">Protocol version: {{ new_version }}</label>
+                            <input type="hidden" class="form-control" value="{{new_version}}" name="version" id="version">
                         </div>
 
                     </div>
@@ -49,7 +45,7 @@
                         %if protocol_initial_data == None:
                             <textarea class="form-control" rows="15" name="protocol_data" id="commands"></textarea>
                         %else:
-                            <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{protocol_initial_data[4]}}</textarea>
+                            <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{protocol_initial_data[5]}}</textarea>
                         %end
                     </div>
                     <button type="submit" class="btn btn-success btn-lg"><strong>Execute</strong></button>
