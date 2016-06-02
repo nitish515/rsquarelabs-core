@@ -60,3 +60,11 @@ padding:0;
           margin-bottom:10px;
           border-radius:0;
          }
+
+ .project-header{
+ height: 180px;
+    border-bottom: 2px solid #efefef;
+    background: rgba(98, 93, 162, 0.08);
+    margin-bottom: 20px;
+
+    }

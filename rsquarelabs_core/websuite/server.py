@@ -143,19 +143,30 @@ def goto_index():
 def index():
     now = datetime.now().strftime(footer_timeformat)
 
-
+    # TODO - optimise this query - the query is to get the total number of not deleted projects
+    all_projects = db_object.do_select("select id, title from projects where is_delete = 0 ",()).fetchall()
     all_projects_activity = db_object.do_select(
-            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  ORDER BY id DESC",())
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  ORDER BY id DESC",()).fetchall()
+
+    all_projects_count = len(all_projects)
+    recent_projects = all_projects[:2]
+    recent_protocols = db_object.do_select(
+            "select id, name, version from protocols where is_delete=0 ORDER BY id DESC ",()).fetchall()[:2]
+
 
 
     content = open(os.path.join(HTML_DIR, 'websuite_index.html')).read()
-    return template(content, all_projects_activity=all_projects_activity,  now=now)
+    return template(content, all_projects_activity=all_projects_activity,
+                    all_projects_count=all_projects_count,
+                    recent_projects=recent_projects,
+                    recent_protocols = recent_protocols,
+                    now=now)
 
 
 @app.route('/websuite/projects.html')
 def projects_list():
     now = datetime.now().strftime(footer_timeformat)
-    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date, is_delete from projects", ())
+    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date, is_delete from projects where is_delete = 0", ())
 
     qs_string = request.query_string
     backup_id = None
