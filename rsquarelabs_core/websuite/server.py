@@ -142,8 +142,14 @@ def goto_index():
 @app.route('/websuite/index.html')
 def index():
     now = datetime.now().strftime(footer_timeformat)
+
+
+    all_projects_activity = db_object.do_select(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  ORDER BY id DESC",())
+
+
     content = open(os.path.join(HTML_DIR, 'websuite_index.html')).read()
-    return template(content, now=now)
+    return template(content, all_projects_activity=all_projects_activity,  now=now)
 
 
 @app.route('/websuite/projects.html')
