@@ -40,9 +40,9 @@ for package in installed_packages_list:
     if package in required_packages:
         required_packages.remove(package)
 
-if not required_packages==[]:
-    print "Please! Reinstall the gromacs."
-    exit()
+# if not required_packages==[]:
+#     print "Please! Reinstall the gromacs."
+#     exit()
 
 # Checking the operating system for gromacs.
 if platform.system()=='Windows':

@@ -1,10 +1,12 @@
 import shutil, argparse, sys, os
-from rsquarelabs_core.utils import run_process
+from rsquarelabs_core.utils import run_process, get_file_info, import_files
 from core.messages import welcome_message, backup_folder_already_exists, \
     write_em_mpd_data, create_em_mdp_data
 from core import settings
 from rsquarelabs_core.engines.db_engine import DBEngine, RSQ_DB_PATH
-
+from rsquarelabs_core.engines.gromacs import  Gromacs
+from core.messages import  write_em_mpd_data, create_em_mdp_data, ions_mdp, minim_mdp
+import logging
 """
 This module aimed at writing python wrapper around the tool Gromacs(www.gromacs.org) - a molecular dynamics package used
 primarily in the field of Computational Drug Discovery also called as Computer Aided Drug Discovery(CADD) and others.
@@ -22,6 +24,76 @@ Read rsquarelabs-core/engines/gromacs/README.md for more info.
 db_object = DBEngine(RSQ_DB_PATH)
 
 TOOL_NAME = 'r2_gromacs'
+
+class ProteinMin(Gromacs):
+    def __init__(self, *args, **kwargs):
+        Gromacs.__init__(self, *args, **kwargs)
+        """ Create ions.mdp for neutralize_system step """
+
+
+    def import_files(self):
+        """
+        For this protocol we dont need many files, just protein is the input
+
+        :return:
+        """
+        protein_file_formats = ['.gro','.pdb']
+        protein_file_path = ""
+        while not os.path.isfile(protein_file_path):
+            protein_file_path = raw_input("Enter the path for protein file : ")
+            for format in protein_file_formats:
+                if protein_file_path.endswith(format) and os.path.isfile(protein_file_path):
+                    break
+        import_files(protein_file_path, self.working_dir, self.project_id )
+
+    def write_ions_mdp(self):
+        """
+        Writes the configuration file *.mdp needed for the run
+
+        Testcase:
+        1. file 'ions.mdp' should be created
+
+        :return:
+        """
+        logging.info("Writing mdp files for protein minmisation ie., ions.mdp, minim.mdp")
+        mdp_for_genion = open(self.working_dir + "ions.mdp", "w", 0777)
+        mdp_for_genion.write(str(ions_mdp))
+        mdp_for_genion.close()
+
+    def write_prod_mdp(self):
+        """
+        Writes the configuration file *.mdp needed for the production run
+
+        Testcase:
+        1. file 'minim.mdp' should be created
+
+        :return:
+        """
+        mdp_for_min = open(self.working_dir + "minim.mdp", "w", 0777)
+        mdp_for_min.write(minim_mdp)
+        mdp_for_min.close()
+
+
+
+
+    def create_topology(self):
+        self.pdb2gmx(step_no=1, input_name="receptor.pdb", output_name="receptor.gro", step_name="Creating topology for Protein")
+
+    def create_water_box(self):
+        self.editconf(step_no=2, input_name="receptor.gro", output_name="newbox.gro", step_name="Defining the box")
+        self.solvate(step_no=3, input_name="newbox.gro", output_name="solv.gro", step_name="Solvating the box")
+
+    def neutralize_system(self):
+        self.write_ions_mdp()
+        self.grompp(step_no=4, input_name="solv.gro", output_name="ions.tpr", mdp_file="ions.mdp", step_name="Pre-processing to check the number of ions needed" )
+        self.genion(step_no=5, input_name="ions.tpr", output_name="solv_ions.gro", step_name="Neutralizing the System")
+
+    def minimize(self):
+        self.write_prod_mdp()
+        self.grompp(step_no=6, input_name="solv_ions.gro", output_name="em.tpr", mdp_file="minim.mdp", step_name="Pre-processing the system before Minimisation")
+        self.mdrun(step_no=7, input_name="em.tpr", nt=1, step_name="Final Minimisation")
+
+
 
 class ProteinLigMin(object):
     """
@@ -64,6 +136,72 @@ class ProteinLigMin(object):
         if self.verbose is True and self.quiet is True:
             print 'Can\'t use both the verbose and quiet flags together'
             sys.exit()
+
+    def import_files(project_path, project_id):
+
+        """
+        This will import the files into the projects into the path. All the files imported via this method should be backed to
+        somewhere in <HOME>/.rsquarelabs or the database.db, so that when the use clicks recreate project, that will be done.
+
+        :param project_path: the project path to which the files should be imported
+        :return:
+        """
+
+        protein_file_formats = [".pdb", ".gro"]
+        ligand_file_formats = [".pdb", ".gro"]
+        ligand_topology_file_formats = [".itp"]
+
+        ligand_file = ""
+        ligand_topology_file = ""
+        protein_file = ""
+
+        while not os.path.isfile(ligand_file):
+            ligand_file = raw_input("Enter the path for ligand file : ")
+            for format in ligand_file_formats:
+                if ligand_file.endswith(format) and os.path.isfile(ligand_file):
+                    break
+
+        while not os.path.isfile(ligand_topology_file):
+            ligand_topology_file = raw_input("Enter the path for ligand topology file : ")
+            for format in ligand_topology_file_formats:
+                if ligand_file.endswith(format) and os.path.isfile(ligand_topology_file):
+                    break
+
+        while not os.path.isfile(protein_file):
+            protein_file = raw_input("Enter the path for protein file : ")
+            for format in protein_file_formats:
+                if protein_file.endswith(format) and os.path.isfile(protein_file):
+                    break
+
+        # import this into the project
+        ligand_structure_info = get_file_info(ligand_file)
+        ligand_topology_info = get_file_info(ligand_topology_file)
+        protien_structure_info = get_file_info(protein_file)
+
+        # insert the file info ie., content and file_name
+
+        db_object.do_insert("""
+        INSERT INTO project_files(file_name, file_content, project_id)
+        VALUES('%s','%s','%s')
+        """ % (ligand_structure_info[0], ligand_structure_info[1], project_id))
+        db_object.do_insert("""
+        INSERT INTO project_files(file_name, file_content, project_id)
+        VALUES('%s','%s','%s')
+        """ % (ligand_topology_info[0], ligand_topology_info[1], project_id))
+
+        db_object.do_insert("""
+        INSERT INTO project_files(file_name, file_content, project_id)
+        VALUES('%s','%s','%s')
+        """ % (protien_structure_info[0], protien_structure_info[1], project_id))
+
+        shutil.copy2(ligand_file, project_path)
+        shutil.copy2(ligand_topology_file, project_path)
+        shutil.copy2(protein_file, project_path)
+
+        os.chmod(os.path.join(project_path, ligand_file), 0777)
+        os.chmod(os.path.join(project_path, ligand_topology_file), 0777)
+        os.chmod(os.path.join(project_path, protein_file), 0777)
+
 
     @staticmethod
     def welcome():
@@ -552,78 +690,7 @@ if __name__ == '__main__':
 def hello():
     print "Hello World!!!"
 
-def get_file_info(file):
-    content = open(file).read()
-    file_name = file.split("/")[-1]
-    return [file_name, content]
-
-
-def import_files(project_path, project_id):
-
-    """
-    This will import the files into the projects into the path. All the files imported via this method should be backed to
-    somewhere in <HOME>/.rsquarelabs or the database.db, so that when the use clicks recreate project, that will be done.
-
-    :param project_path: the project path to which the files should be imported
-    :return:
-    """
-
-    protein_file_formats = [".pdb", ".gro"]
-    ligand_file_formats = [".pdb", ".gro"]
-    ligand_topology_file_formats = [".itp"]
-
-    ligand_file = ""
-    ligand_topology_file = ""
-    protein_file = ""
 
 
 
-    while not os.path.isfile(ligand_file):
-        ligand_file = raw_input("Enter the path for ligand file : ")
-        for format in ligand_file_formats:
-            if ligand_file.endswith(format) and os.path.isfile(ligand_file):
-                break
 
-    while not os.path.isfile(ligand_topology_file):
-        ligand_topology_file = raw_input("Enter the path for ligand topology file : ")
-        for format in ligand_topology_file_formats:
-            if ligand_file.endswith(format) and os.path.isfile(ligand_topology_file):
-                break
-
-    while not os.path.isfile(protein_file):
-        protein_file = raw_input("Enter the path for protein file : ")
-        for format in protein_file_formats:
-            if protein_file.endswith(format) and os.path.isfile(protein_file):
-                break
-
-    # import this into the project
-    ligand_structure_info = get_file_info(ligand_file)
-    ligand_topology_info = get_file_info(ligand_topology_file)
-    protien_structure_info = get_file_info(protein_file)
-
-
-    # insert the file info ie., content and file_name
-
-    db_object.do_insert("""
-    INSERT INTO project_files(file_name, file_content, project_id)
-    VALUES('%s','%s','%s')
-    """ %(ligand_structure_info[0],ligand_structure_info[1],project_id))
-    db_object.do_insert("""
-    INSERT INTO project_files(file_name, file_content, project_id)
-    VALUES('%s','%s','%s')
-    """ %(ligand_topology_info[0],ligand_topology_info[1],project_id))
-
-    db_object.do_insert("""
-    INSERT INTO project_files(file_name, file_content, project_id)
-    VALUES('%s','%s','%s')
-    """ %(protien_structure_info[0],protien_structure_info[1],project_id))
-
-
-    shutil.copy2(ligand_file, project_path)
-    shutil.copy2(ligand_topology_file, project_path)
-    shutil.copy2(protein_file, project_path)
-
-
-    os.chmod(os.path.join(project_path, ligand_file), 0777)
-    os.chmod(os.path.join(project_path, ligand_topology_file), 0777)
-    os.chmod(os.path.join(project_path, protein_file), 0777)

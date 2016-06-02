@@ -28,8 +28,6 @@ import sys, os, json, requests
 from datetime import datetime
 from termcolor import cprint
 
-
-
 """
 adds the rsquarelabs-core module to this script path to access the modules inside rsquarelabs-core
 """
@@ -49,7 +47,9 @@ rsquarelabs_core should be imported after the CORE_DIR is added to sys.path
 """
 from rsquarelabs_core.config import RSQ_PROJECTS_HOME, RSQ_DB_PATH
 from rsquarelabs_core.engines.db_engine import DBEngine
-from rsquarelabs_core.engines.gromacs.gromacs import ProteinLigMin, import_files
+from rsquarelabs_core.engines.gromacs.gromacs import ProteinLigMin, ProteinMin
+from rsquarelabs_core.engines.gromacs.core.messages import  welcome_message
+
 
 
 
@@ -104,23 +104,34 @@ def main():
     if not 'init' in cmdargs:
 
         # Creating a object to the ProteinLigMin class
-        obj = ProteinLigMin(
-            ligand_file='ligand.gro',
-            ligand_topology_file='ligand.itp',
-            protein_file='protein.pdb',
-            working_dir="%s/"%CURRENT_PATH,
-            verbose=True,
-            quiet=False,
-            project_id=project_id
-        )
+
+
+        # TODO - read the .yaml or project data and decide which protocol type is this
+        project_data = {} # some data from db
+
+        # lets say the protMin protocol is 1
+        project_data['protocol_type'] = 1
+
+        if project_data['protocol_type'] == 1:
+            obj = ProteinMin(
+                working_dir="%s/" % CURRENT_PATH,
+                project_id=project_id
+            )
+
+        elif project_data['protocol_type'] == 2: # protein-lig min
+            obj = ProteinLigMin(
+                ligand_file='ligand.gro',
+                ligand_topology_file='ligand.itp',
+                protein_file='protein.pdb',
+                working_dir="%s/"%CURRENT_PATH,
+                project_id=project_id
+            )
 
     #
     if 'init' in cmdargs:
         if is_config_file_avaliable:
             print "ERROR! You can't start project in this directory"
             exit()
-        print "Lets start the project"
-
 
         project_data = {}
         project_data["title"] = ""
@@ -129,8 +140,29 @@ def main():
         project_data["short_note"] = ""
         project_data["slug"] = ""
         project_data["path"] = ""
+        project_data["protocol_type"] = ""
         project_data["type"] = TOOL_NAME
         is_delete = 0
+
+#         while (project_data["protocol_type"].lstrip() == ""):
+#             project_data["protocol_type"] = raw_input(  """ %s
+# Please select the protocol you want to work on
+#
+# 1. Protein Minimisation
+# 2. Protein-Ligand Minimisation
+# """ %(welcome_message))
+#
+
+
+        print "Lets start the project with Protein Minimisation Protocol"
+        print "(PS: Protein-Ligand Min Protocol will be released soon)"
+
+
+
+
+
+
+
 
 
         while( project_data["title"].lstrip() == ""):
@@ -195,8 +227,7 @@ def main():
                            project_data["log"],
                            project_data["type"],
                            project_data["date"],
-                           int(is_delete),
-                           ))
+                           int(is_delete), ))
 
         if cur.lastrowid: # if created into db
             from random import randint
@@ -224,27 +255,20 @@ Project created with id '%s',
     elif 'importfiles' in cmdargs:
         if is_config_file_avaliable:
 
-            import_files(CURRENT_PATH, project_id)
+            obj.import_files()
         else:
             print "ERROR! This directory do not have project details"
 
     elif 'createtopology' in cmdargs:
-
         obj.create_topology()
 
     elif 'createwaterbox' in cmdargs:
-
-        obj.prepare_system()
-        obj.solvate_complex()
+        obj.create_water_box()
 
     elif 'neutralisecomplex' in cmdargs:
-
-        obj.write_em_mdp()
-        obj.add_ions()
+        obj.neutralize_system()
 
     elif 'minimize' in cmdargs:
-
-        obj.write_emreal_mdp()
         obj.minimize()
 
     else:
