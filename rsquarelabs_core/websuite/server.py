@@ -4,7 +4,7 @@ import os, sys
 from datetime import datetime
 from time import time
 import bottle as bottle2
-from bottle import Bottle, request, static_file, template, redirect
+from bottle import Bottle, request, static_file, template, redirect, error
 
 
 
@@ -26,6 +26,19 @@ app = Bottle()
 footer_timeformat = "%Y %b, %d %H:%M:%S %p"
 
 bottle2.TEMPLATE_PATH.insert(0, HTML_DIR)
+
+
+@app.error(500)
+def custom500(error):
+    content = open(os.path.join(HTML_DIR, '500_error.html')).read()
+    now = datetime.now().strftime(footer_timeformat)
+    return template(content, now=now)
+
+@app.error(404)
+def error404(error):
+    now = datetime.now().strftime(footer_timeformat)
+    content = open(os.path.join(HTML_DIR, '404_error.html')).read()
+    return template(content)
 
 
 @app.route('/websuite/automator.html')
@@ -204,11 +217,6 @@ def activity(project_id):
 
 filter_commands = ['gmx pdb2gmx', 'gmx editconf']
 
-@app.error(404)
-def error404(error):
-    now = datetime.now().strftime(footer_timeformat)
-    content = open(os.path.join(HTML_DIR, '404_error.html')).read()
-    return template(content)
 
 @app.route('/assets/css/<filename>')
 def server_static(filename):
