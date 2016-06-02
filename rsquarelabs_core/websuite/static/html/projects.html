@@ -25,24 +25,26 @@
                         <th>Project Email</th>
                         <th>Project Type</th>
                         <th>Project Path</th>
-                        <!--<th>Project Log</th>-->
                         <th>Project Start Date</th>
+                        <th> Actions </th>
                       </tr>
                     </thead>
                     <tbody>
 
                     % for project in projects_list :
-                      <tr>
-                        <th><a href="/websuite/project/{{project[0]}}"> {{project[0]}}</a></th>
-                        <th>{{project[1]}}</th>
-                        <th>{{project[2]}}</th>
-                        <th>{{project[3]}}</th>
-                        <th>{{project[4]}}</th>
-                        <th>{{project[5]}}</th>
-                        <th>{{project[6]}}</th>
-                        <th>{{project[8]}}</th>
-                        <!--<th>{{project[8]}}</th>-->
-                      </tr>
+                        % if project[9] == 0:
+                             <tr>
+                               <th><a href="/websuite/project/{{project[0]}}"> {{project[0]}}</a></th>
+                               <th>{{project[1]}}</th>
+                               <th>{{project[2]}}</th>
+                               <th>{{project[3]}}</th>
+                               <th>{{project[4]}}</th>
+                               <th>{{project[5]}}</th>
+                               <th>{{project[6]}}</th>
+                               <th>{{project[8]}}</th>
+                               <th><a href="/websuite/projects.html?backup_id={{project[0]}}" class="btn btn-primary" role="button"> Back up </a> <a href="/websuite/projects.html?delete_id={{project[0]}}" class="btn btn-danger" role="button"> Delete </a> </th>
+                             </tr>
+                        %end
                     %end
                     </tbody>
                 </table>
