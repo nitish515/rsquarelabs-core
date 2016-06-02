@@ -9,3 +9,5 @@ RSQ_LOG_PATH = os.path.join(RSQ_HOME, 'rsquarelabs.log')
 
 RSQ_DB_PATH = os.path.join(RSQ_HOME, 'rsquarelabs.db')
 RSQ_DB_LOG = os.path.join(RSQ_HOME, 'DBEngine.log')
+
+

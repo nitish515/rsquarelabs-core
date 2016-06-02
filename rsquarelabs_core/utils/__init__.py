@@ -1,8 +1,10 @@
 __author__ = 'rrmerugu'
-import subprocess, shlex, sys, webbrowser, logging
+import subprocess, shlex, sys, webbrowser, logging, os, shutil
+from subprocess import  Popen, PIPE
 from rsquarelabs_core.engines.db_engine import  DBEngine
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_LOG_PATH
 from datetime import datetime
+from time import sleep
 
 # logging.basicConfig(filename=RSQ_LOG_PATH, level=logging.DEBUG)
 
@@ -19,10 +21,141 @@ logger.addHandler(handler)
 
 
 
+
 db_object = DBEngine(RSQ_DB_PATH)
 
 def check_process():
     pass
+
+
+def set_file_premissions(file_path):
+
+    sleep(1)
+    if os.path.exists(file_path):
+        os.chmod(file_path , 0777)
+    else:
+        print "File '%s' does not exist" %file_path
+        exit()
+
+
+def import_files(file_path, project_path, project_id):
+    """
+    This will
+    1. import the files into working dir
+    2. enter the file info into the database
+
+
+    :param file_path: path of the importing file (from path)
+    :param project_path:  path of the working dir (to path)
+    :param project_id: project path
+    :return:
+    """
+    if not os.path.exists(file_path):
+        logging.error("Unable to import file '%s'" % file_path)
+        exit()
+    file_info = get_file_info(file_path)
+
+    db_object.do_insert("""
+    INSERT INTO project_files(file_name, file_content, project_id)
+    VALUES('%s','%s','%s')
+    """ % (file_info[0], file_info[1], project_id))
+
+
+    """ Copy the file to project path and change permissions """
+    shutil.copy2(file_path, project_path)
+    os.chmod(file_path, 0777)
+
+
+
+
+def get_file_info(file):
+    content = open(file).read()
+    file_name = file.split("/")[-1]
+    return [file_name, content]
+
+def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id):
+    logger.info( "INFO: Attempting to execute [STEP:%s]'%s'" %(step_no, step_name))
+    try:
+        ## insert the command into the db with status (to_run)
+        extra = None
+        if ">>" in command:
+            extra = " >> %s" % command.split(">>")[1].rstrip()
+            command = command.split(">>")[0].rstrip()
+            cmd_args = shlex.split(command)
+            if "grompp" in command:
+                """
+                Expection for genion command of gromacs because, it needs some data from output to be used for further step.
+                """
+                cmd_args = shlex.split(command).append(extra)
+            extra = None
+
+        elif "<<" in command:
+            """
+            #ignore <<,  because thhis is given when user input needs to be provided
+            """
+            extra = " << %s"% command.split("<<")[1].rstrip()
+            command = command.split("<<")[0].rstrip()
+            cmd_args =  list(shlex.split(command))
+
+        else:
+            cmd_args = shlex.split(command)
+
+
+
+
+
+
+        # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
+        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at )\
+         VALUES("%s",%s,"%s","%s","%s","%s", %s, "%s")'% (tool_name, int(step_no), step_name, command, "to_run", log_file, int(project_id), str(datetime.now()) )
+
+
+        cur = db_object.do_insert(cmd)
+
+
+        fh_stdout = open(log_file, 'wb')
+        fh_stderr = open("%s.err"%log_file, 'wb')
+
+        process = Popen(cmd_args, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+
+        if extra:
+            process.stdin.write(extra)
+
+        stdout, stderr = process.communicate()
+
+        fh_stdout.write(stdout)
+        fh_stderr.write(stderr)
+
+        logger.info("Runing the stepNo: %s, StepName: %s with process id %s"%(step_no, step_name, process.pid))
+        ret = process.poll()
+
+        print "id of data insertion ",cur.lastrowid
+
+        if process.pid is not None:
+            db_object.cur.execute( "UPDATE project_activity SET pid ='%s' where id='%s' " %(process.pid, cur.lastrowid))
+
+
+        ret_data = {}
+        ret_data['pid'] = process.pid
+        ret_data['stdout'] = ""
+        ret_data['stderr'] = ""
+
+
+        if ret == None or ret== 0:
+            logger.info(  'Completed!')
+            return ret_data
+
+
+        else:
+            print "HeadsUP: Killed by Signal"
+            logger.info( "HEADS UP: Killed by signal :(", -ret)
+            sys.exit()
+
+    except Exception as e:
+        logger.error(e)
+        logger.info( "HEADS UP: Command failed")
+        sys.exit()
+
 
 
 def run_process(step_no, step_name, command, tool_name, log_file, project_id):
@@ -79,7 +212,7 @@ def run_process(step_no, step_name, command, tool_name, log_file, project_id):
 
         fh_stdout = open(log_file, 'wb')
         fh_stderr = open("%s.err"%log_file, 'wb')
-        process = subprocess.Popen(cmd_args, stdout=fh_stdout, stderr=fh_stderr)
+        process = Popen(cmd_args, stdout=fh_stdout, stderr=fh_stderr)
 
         logger.info("Runing the stepNo: %s, StepName: %s with process id %s"%(step_no, step_name, process.pid))
         ret = process.poll()

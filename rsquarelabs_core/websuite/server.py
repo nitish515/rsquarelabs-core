@@ -106,7 +106,7 @@ def projects_list():
     return template(content, projects_list=projects_data,now=now)
 
 
-@app.route('/websuite/project/:project_id/activiy')
+@app.route('/websuite/project/:project_id')
 def projects_view(project_id):
     now = datetime.now().strftime(footer_timeformat)
 
