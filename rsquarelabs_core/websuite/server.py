@@ -1,6 +1,6 @@
 __author__ = 'rrmerugu'
 
-import os, sys
+import os, sys, subprocess
 from datetime import datetime
 from time import time
 import bottle as bottle2
@@ -17,7 +17,7 @@ JS_DIR      = os.path.join(STATIC_DIR, 'js')
 
 from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
-from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH
+from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_PROJECTS_HOME
 
 db_object = DBEngine(RSQ_DB_PATH)
 
@@ -149,9 +149,30 @@ def index():
 @app.route('/websuite/projects.html')
 def projects_list():
     now = datetime.now().strftime(footer_timeformat)
-    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date from projects", ())
-    content =  open(os.path.join(HTML_DIR, 'projects.html')).read()
-    return template(content, projects_list=projects_data,now=now)
+    projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date, is_delete from projects", ())
+
+    qs_string = request.query_string
+    backup_id = None
+    delete_id = None
+
+    if "backup_id=" in qs_string:
+        backup_id = qs_string.split('backup_id=')[1].split('&')[0]
+    elif "delete_id=" in qs_string:
+        delete_id = qs_string.split('delete_id=')[1].split('&')[0]
+
+    if backup_id != None:
+        project_slug = db_object.do_select("SELECT slug from projects where id=?", (backup_id, )).fetchone()[0]
+        PROJECT_ORIGIN_PATH = RSQ_PROJECTS_HOME + '/' + project_slug
+
+        subprocess.Popen(['cp', '-r', PROJECT_ORIGIN_PATH, RSQ_BACKUP_PATH], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        redirect('/websuite/projects.html')
+    elif delete_id != None:
+        db_object.cur.execute("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
+        redirect('/websuite/projects.html')
+
+    content = open(os.path.join(HTML_DIR, 'projects.html')).read()
+
+    return template(content, projects_list=projects_data, now=now)
 
 
 @app.route('/websuite/project/:project_id')

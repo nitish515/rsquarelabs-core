@@ -194,7 +194,7 @@ def run_process(step_no, step_name, command, tool_name, log_file, project_id):
             """
             extra = " << %s"% command.split("<<")[1].rstrip()
             command = command.split("<<")[0].rstrip()
-            cmd_args =  list(shlex.split(command))
+            cmd_args = list(shlex.split(command))
             cmd_args.append(extra)
         else:
             cmd_args = shlex.split(command)
