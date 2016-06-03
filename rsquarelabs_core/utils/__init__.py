@@ -57,8 +57,8 @@ def import_files(file_path, project_path, project_id):
 
     db_object.do_insert("""
     INSERT INTO project_files(file_name, file_content, project_id)
-    VALUES('%s','%s','%s')
-    """ % (file_info[0], file_info[1], project_id))
+    VALUES(?,?,?)
+    """, (file_info[0], file_info[1], project_id, ))
 
 
     """ Copy the file to project path and change permissions """
@@ -107,10 +107,10 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
         cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at )\
-         VALUES("%s",%s,"%s","%s","%s","%s", %s, "%s")'% (tool_name, int(step_no), step_name, command, "to_run", log_file, int(project_id), str(datetime.now()) )
+         VALUES(?,?,?,?,?,?, ?, ?)'
 
 
-        cur = db_object.do_insert(cmd)
+        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), ))
 
 
         fh_stdout = open(log_file, 'wb')
@@ -204,10 +204,10 @@ def run_process(step_no, step_name, command, tool_name, log_file, project_id):
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
         cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at )\
-         VALUES("%s",%s,"%s","%s","%s","%s", %s, "%s")'% (tool_name, int(step_no), step_name, command, "to_run", log_file, int(project_id), str(datetime.now()) )
+         VALUES(?,?,?,?,?,?, ?, ?)'
 
 
-        cur = db_object.do_insert(cmd)
+        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), ))
         logger.debug(cur)
 
         fh_stdout = open(log_file, 'wb')

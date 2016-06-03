@@ -37,4 +37,6 @@ CREATE TABLE protocols
     parent_protocol INT,
     master_protocol INT,
     protocol_data TEXT NOT NULL,
-    is_delete INT)
+    is_delete INT,
+    python_file TEXT,
+    log_file TEXT)

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    %if auto_refresh:
+        <meta http-equiv="refresh" content="1">
+    %end
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>RMV | RSQUARE LABS Automator </title>
+</head>
+<body>
+% include('header.html')
+
+    <div class="container pageview" >
+        <h1>Execution</h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form group">
+                    <label for="execution"></label>
+                    <textarea class="form-control" id="execution" rows="15" name="execution_data">{{executed_data}}</textarea>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form group">
+                    <label for="execution1"></label>
+                    <textarea class="form-control" id="execution1" rows="15" name="execution_data"></textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+% include('footer.html', now=now)
+</body>
+</html>

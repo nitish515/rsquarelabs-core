@@ -37,7 +37,10 @@
                                 <td>{{protocol[3]}}</td>
                                 <td>{{protocol[4]}}</td>
                                 <td>{{protocol[5]}}</td>
-                                <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}" class=" btn btn-default">import</a> <a href="/websuite/protocols.html?protocol_id={{protocol[0]}}" class="btn btn-danger" role="button">delete</a></td>
+                                <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}" class=" btn btn-default">Import</a>
+                                    <a href="/websuite/protocols.html?protocol_id={{protocol[0]}}" class="btn btn-danger" role="button">Delete</a>
+                                    <a href="/websuite/automator_run.html?protocol_id={{protocol[0]}}" class="btn btn-success" role="button">Execute</a>
+                                </td>
                             </tr>
                         %end
                     %end
