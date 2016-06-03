@@ -19,6 +19,50 @@ from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_PROJECTS_HOME
 
+
+
+
+execute_template = """
+import os, sys, logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# create a file handler
+handler = logging.FileHandler("RSQ_DB_LOG")
+handler.setLevel(logging.INFO)
+# create a logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+# add the handlers to the logger
+logger.addHandler(handler)
+
+
+#adds the rsquarelabs-core module to this script path to access the modules inside rsquarelabs-core
+
+
+
+CORE_DIR = "/home/nitish/PycharmProjects/rsquarelabs-core"
+# Path appended of rsquarelabs_core to sys for accessing modules inside rsquarelabs_core
+sys.path.append(CORE_DIR)
+
+from rsquarelabs_core.engines.gromacs.gromacs import ProteinMin
+
+logger.info("Executing the script")
+
+log_file = "RSQ_DB_LOG"
+
+"""
+
+
+
+
+
+
+
+
+
+
 db_object = DBEngine(RSQ_DB_PATH)
 
 app = Bottle()
@@ -97,18 +141,64 @@ def automator_insert():
 
 
     is_delete = 0
+    # import re
+    # protocol_data = re.escape(protocol_data)
+
 
     db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete)\
-                        VALUES ('%s', '%s', '%s', '%s', '%s', '%s')" % (name, version, parent_protocol, master_protocol, protocol_data, int(is_delete)))
+                        VALUES (?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete,))
 
     protocol_id = db_object.cur.lastrowid
 
-    file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s.py" % (protocol_id, version, time()))
-    print file_name
-    fh = open(file_name, 'w')
+    file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s" % (protocol_id, version, time()))
+    py_file_name = "%s.py" %file_name
+    log_file_name = "%s.log" % file_name
+
+    db_object.conn.execute("UPDATE protocols SET python_file = ?, log_file = ? WHERE id =?", (py_file_name, log_file_name, protocol_id, ))
+    db_object.conn.commit()
+
+    protocol_header = execute_template.replace('RSQ_DB_LOG', log_file_name)
+
+    protocol_data = protocol_header + protocol_data
+
+
+    fh = open(py_file_name, 'w')
     fh.write(protocol_data)
 
-    redirect('/websuite/automator.html')
+    #TODO - find better approach for %s
+    redirect('/websuite/automator_run.html?protocol_id=%s&start=true' % (protocol_id))
+
+
+@app.route('/websuite/automator_run.html')
+def automator_run():
+    now = datetime.now().strftime(footer_timeformat)
+
+    qs_string = request.query_string
+    protocol_id = None
+
+
+
+    if "protocol_id=" in qs_string:
+        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
+
+    if "start=" in qs_string:
+        start = qs_string.split('start=')[1].split('&')[0]
+
+    print start
+    print type(start)
+
+    executed_protocol = db_object.do_select(
+        "SELECT python_file, log_file from protocols where id=?", (protocol_id, )).fetchone()
+    if start == "true":
+        subprocess.Popen(['python', executed_protocol[0]], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        redirect('/websuite/automator_run.html?protocol_id=%s&start=false' % (protocol_id))
+    elif start == "false":
+        fh = open(executed_protocol[1], 'r')
+        executed_data = fh.read()
+
+    content = open(os.path.join(HTML_DIR, 'automator_run.html')).read()
+    return template(content, executed_data=executed_data, auto_refresh=True, now=now)
+
 
 @app.route('/websuite/protocols.html')
 def protocols():
@@ -122,7 +212,8 @@ def protocols():
 
 
     if protocol_id != None:
-        db_object.cur.execute("UPDATE protocols SET is_delete = 1 WHERE id= ?", (protocol_id,))
+        db_object.conn.execute("UPDATE protocols SET is_delete = 1 WHERE id= ?", (protocol_id,))
+        db_object.conn.commit()
 
     protocol_list = db_object.do_select("SELECT id, name, version, parent_protocol , master_protocol, protocol_data, is_delete from protocols", ())
 
@@ -184,7 +275,8 @@ def projects_list():
         subprocess.Popen(['cp', '-r', PROJECT_ORIGIN_PATH, RSQ_BACKUP_PATH], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         redirect('/websuite/projects.html')
     elif delete_id != None:
-        db_object.cur.execute("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
+        db_object.conn.execute("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
+        db_object.conn.commit()
         redirect('/websuite/projects.html')
 
     content = open(os.path.join(HTML_DIR, 'projects.html')).read()

@@ -45,9 +45,9 @@ class DBEngine:
         data = self.cur.execute(cmd, params)
         return data
 
-    def do_insert(self, cmd):
+    def do_insert(self, cmd, params):
         try:
-            self.cur.execute(cmd)
+            self.cur.execute(cmd, params)
             self.conn.commit()
         except Exception as e:
             logger.error(e)

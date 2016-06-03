@@ -223,8 +223,8 @@ def main():
 
 
         cur = db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date, is_delete)\
-                        VALUES('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s')"
-                        % (project_data["title"],
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (project_data["title"],
                            project_data["tags"],
                            project_data["user_email"],
                            project_data["slug"],
@@ -234,7 +234,7 @@ def main():
                            project_data["log"],
                            project_data["type"],
                            project_data["date"],
-                           int(is_delete), ))
+                           is_delete, ))
 
         if cur.lastrowid: # if created into db
             from random import randint

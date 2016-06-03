@@ -182,17 +182,17 @@ class ProteinLigMin(object):
 
         db_object.do_insert("""
         INSERT INTO project_files(file_name, file_content, project_id)
-        VALUES('%s','%s','%s')
-        """ % (ligand_structure_info[0], ligand_structure_info[1], project_id))
+        VALUES(?,?,?)
+        """, (ligand_structure_info[0], ligand_structure_info[1], project_id, ))
         db_object.do_insert("""
         INSERT INTO project_files(file_name, file_content, project_id)
-        VALUES('%s','%s','%s')
-        """ % (ligand_topology_info[0], ligand_topology_info[1], project_id))
+        VALUES(?,?,?)
+        """, (ligand_topology_info[0], ligand_topology_info[1], project_id, ))
 
         db_object.do_insert("""
         INSERT INTO project_files(file_name, file_content, project_id)
-        VALUES('%s','%s','%s')
-        """ % (protien_structure_info[0], protien_structure_info[1], project_id))
+        VALUES(?,?,?)
+        """, (protien_structure_info[0], protien_structure_info[1], project_id, ))
 
         shutil.copy2(ligand_file, project_path)
         shutil.copy2(ligand_topology_file, project_path)

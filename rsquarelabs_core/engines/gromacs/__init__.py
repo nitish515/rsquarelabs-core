@@ -60,6 +60,21 @@ class Gromacs:
         self.project_id = kwargs.get('project_id', None)
         self.working_dir = kwargs.get('working_dir', './')
 
+        # logger
+        self.log_file = kwargs.get("log_file",None)
+
+        if self.log_file:
+            self.logger = logging.getLogger(__name__)
+            self.logger.setLevel(logging.INFO)
+            # create a file handler
+            handler = logging.FileHandler(self.log_file)
+            handler.setLevel(logging.INFO)
+            # create a logging format
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            # add the handlers to the logger
+            self.logger.addHandler(handler)
+
         # gather the files specified by the user
         self.gather_files()
 
@@ -73,7 +88,7 @@ class Gromacs:
 
     def create_receptor_lig_min_mdp(self):
 
-        logging.info("Writing mdp files for receptor-ligand ie., em.mdp, em_real.mdp")
+        self.logger.info("Writing mdp files for receptor-ligand ie., em.mdp, em_real.mdp")
         mdp_for_genion = open(self.working_dir + "em.mdp", "w", 0777)
         mdp_for_genion.write(str(write_em_mpd_data))
         mdp_for_genion.close()
@@ -108,7 +123,7 @@ class Gromacs:
                 step_name="Topology Generation"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file =  self.working_dir + "step-%s.log"%step_no
         command = pdb2gmx + " -f " + self.working_dir + input_name + " -o " + \
             self.working_dir + output_name + " -ignh -p " + \
@@ -116,7 +131,7 @@ class Gromacs:
             "posre.itp -ff gromos53a6 -water spc "
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
 
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
     def make_receptor_ligand_complex(self, step_no,
                                       receptor_name="receptor.gro",
@@ -124,7 +139,7 @@ class Gromacs:
                                       step_name="Maing Receptor-Ligand Complex"):
 
         # set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         receptor = self.working_dir + receptor_name
         ligand = self.working_dir + ligand_name
         system = self.working_dir + "system.gro"
@@ -177,7 +192,7 @@ class Gromacs:
         last_line = protein_file.readlines()[-1]
         # print last_line
         system_file.write(last_line)
-        logging.info( "system.gro WAS GENERATED SUCCESSFULLY")
+        self.logger.info( "system.gro WAS GENERATED SUCCESSFULLY")
 
         f1 = open(self.working_dir + 'topol.top', 'r',0777)
         f2 = open(self.working_dir + 'topol_temp.top', 'w',0777)
@@ -188,7 +203,7 @@ class Gromacs:
                      )
         f1.close()
         f2.close()
-        logging.info("ligand topolgy added into topol.top ")
+        self.logger.info("ligand topolgy added into topol.top ")
         # swaping the files to get the original file
         f1 = open(self.working_dir + 'topol.top', 'w',0777)
         f2 = open(self.working_dir + 'topol_temp.top', 'r',0777)
@@ -198,7 +213,7 @@ class Gromacs:
         f1.close()
         f2.close()
         os.unlink(self.working_dir + 'topol_temp.top')
-        logging.info("STEP%s: %s, completed. log written to project log " % (step_no, step_name))
+        self.logger.info("STEP%s: %s, completed. log written to project log " % (step_no, step_name))
 
 
     def editconf(self, step_no,
@@ -207,45 +222,45 @@ class Gromacs:
                  step_name = "Defining the Box"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " %(step_no,step_name))
+        self.logger.info("STEP%s: Attempting the step %s " %(step_no,step_name))
         log_file = self.working_dir + "step-%s.log" % step_no
         command = editconf + " -f " + self.working_dir + input_name + " -o " + \
             self.working_dir + output_name + " -bt cubic -d 1 -c "
 
         print command
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
     def solvate(self, step_no, input_name="newbox.gro", output_name="solv.gro", step_name = "Solvating the Box"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = self.working_dir + "step-%s.log" % step_no
         command = solvate + " -cp " + self.working_dir + input_name + " -p " + \
             self.working_dir + "topol.top -cs spc216.gro -o " + \
             self.working_dir + output_name
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
     def genion(self, step_no, input_name="ions.tpr", output_name="solv_ions.gro", step_name = "Adding Ions to Neutralise the System"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = self.working_dir + "step-%s.log" % step_no
         command = genion + " -s " + self.working_dir + input_name + " -o " + \
                   self.working_dir + output_name + " -p " + self.working_dir + \
                   "topol.top -nname CL -pname NA -neutral << EOF\nSOL\nEOF"
         print command
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
     def grompp(self,  step_no, input_name=None, output_name=None, mdp_file=None,  step_name = "Gromacs Pre-processing"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = self.working_dir + "step-%s.log" % step_no
 
         command = grompp + " -f " + self.working_dir + mdp_file + " -c " + \
@@ -253,15 +268,15 @@ class Gromacs:
             "topol.top -o " + self.working_dir + output_name + " -po " + \
             self.working_dir + "mdout.mdp -maxwarn 3"
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
     def mdrun(self, step_no, input_name=None, nt=1, step_name="mdrun "):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         input_with_no_extension = input_name.split(".")[0]
-        
-        logging.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+
+        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = self.working_dir + "step-%s.log" % step_no
         command = mdrun + " -v  -s " + self.working_dir + input_with_no_extension + ".tpr -c " + \
                   self.working_dir + input_with_no_extension+".gro -o " + self.working_dir + \
@@ -269,4 +284,4 @@ class Gromacs:
                   self.working_dir + input_with_no_extension + ".xtc -g " + self.working_dir + \
                   input_with_no_extension + ".log  -nt " + str(nt)
         run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
-        logging.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
+        self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
