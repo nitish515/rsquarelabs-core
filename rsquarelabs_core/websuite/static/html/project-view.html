@@ -10,12 +10,26 @@
 </head>
 <body>
 % include('header.html')
-<div class="container pageview">
+<div class=" pageview">
 
 
 
     %if project_data:
+    <section class="project-header">
+        <div class="container">
         <div class="row">
+
+
+               <div class="col-md-12 breadcrumb-col">
+                                <!--<h1 class="text-center">WebSuite Index</h1>-->
+                <ol class="breadcrumb">
+                  <li><a href="/websuite/index.html">Websuite</a></li>
+                  <li> Project View </li>
+
+                </ol>
+            </div>
+
+
 
             <div class="col-md-6">
                 <h1>{{project_data[2]}} <small>{{project_data[1]}}</small></h1>
@@ -34,9 +48,14 @@
             </div>
 
         </div>
+        </div>
+
+    </section>
+
+        <div class="container">
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <h4>Project Files(in directory) </h4>
                 <ol>
                 % for file in file_list:
@@ -46,11 +65,13 @@
 
 
             </div>
-            <div class="col-md-6">
-                <h4>Project Activity <small><a href="/websuite/project/{{project_data[0]}}/activity">seeall</a></small>  </h4>
+            <div class="col-md-8">
+                <h4>Project Activity <small><a href="/websuite/project/{{project_data[0]}}/activity">see all</a></small>  </h4>
                  <ul>
                 % for activity in project_activity_data:
-                    <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong>{{activity[2]}}, <strong>StepName:</strong>{{activity[3]}}, <strong>PID:</strong>{{activity[5]}} <pre>{{activity[4]}}</pre></li>
+                    <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}, <strong>PID:</strong> {{activity[5]}}
+                        <br>
+                        <pre>{{activity[4]}}</pre></li>
                 % end
                 </ul>
 
@@ -73,13 +94,18 @@
             <pre>{{project_config}}</pre>
         %end
 
+
+        </div>
+
     % else:
 
 
 
         <hr>
+    <div class="container">
     <h2 class="text-center">No such Project Exists to my knowledge</h2>
     <p class="text-center">Either the <strong></strong> is deleted or permissions are restricted</p>
+        </div>
 
 
     %end

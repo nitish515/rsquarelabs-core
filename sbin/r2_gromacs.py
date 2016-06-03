@@ -101,6 +101,13 @@ def main():
             project_id = db_object.do_select("select id from projects where slug= ?", (project_key, )).fetchone()[0]
 
 
+    if is_config_file_avaliable == False:
+        if not 'init' in cmdargs:
+            print "This path doesnt have a project, so you are allowed to only create project via init."
+            print "eg: r2_gromacs init"
+            exit()
+
+
     if not 'init' in cmdargs:
 
         # Creating a object to the ProteinLigMin class

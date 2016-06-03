@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-md-12 breadcrumb-col">
                                 <!--<h1 class="text-center">WebSuite Index</h1>-->
-                                <ol class="breadcrumb">
+                <ol class="breadcrumb">
                   <li><a href="/websuite/index.html">Websuite</a></li>
                   <li> Dashboard </li>
               
@@ -23,40 +23,83 @@
 
                 <ul class="list-group">
                   <li class="list-group-item">
-                    Project History
+                      <span class="badge">{{all_projects_count}}</span>
+                    <a href="/websuite/projects.html">Projects</a>
+                  </li>
+                     <li class="list-group-item">
+                     <span class="badge">{{len(all_projects_activity)}}</span>
+                    Project Activities Count
                   </li>
                     <li class="list-group-item">
-                    <span class="badge">14</span>
+                    <span class="badge">0</span>
                     Running Tasks
                   </li>
                          <li class="list-group-item">
-                    <span class="badge">1214</span>
+                    <span class="badge">0</span>
                     Knowledge Contributed
                   </li>
                 </ul>
 
 
+                <!--<div class="panel panel-default">-->
+                  <!--<div class="panel-heading">-->
+                    <!--<h3 class="panel-title">Jobs in Queue </h3>-->
+                  <!--</div>-->
+                  <!--<div class="panel-body">-->
+                    <!--Panel content-->
+                  <!--</div>-->
+                <!--</div>-->
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">Jobs in Queue </h3>
+                    <h3 class="panel-title">Recent Projects </h3>
                   </div>
                   <div class="panel-body">
-                    Panel content
+                      <ul class="list-unstyled">
+                      % for project in recent_projects:
+                        <li><a href="/websuite/project/{{project[0]}}">{{project[1]}}</a></li>
+                      % end
+                   </ul>
+
                   </div>
                 </div>
-                <div class="panel panel-default">
+
+               <div class="panel panel-default">
                   <div class="panel-heading">
-                    <h3 class="panel-title">Recently Finished Jobs </h3>
+                    <h3 class="panel-title">Recent Protocols </h3>
                   </div>
                   <div class="panel-body">
-                    Panel content
+                    <ul class="list-unstyled">
+                      % for protocol in recent_protocols:
+                        <li><a href="/websuite/protocol/{{protocol[0]}}">{{protocol[1]}}</a></li>
+                      % end
                   </div>
                 </div>
 
 
             </div>
             <div class="col-md-9">
-                <h2>Something comes here</h2>
+                <!--<h2>Something comes here</h2>-->
+                  <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Overall Commands Activity </h3>
+
+
+
+                  </div>
+                  <div class="panel-body">
+                   <ul class="list-unstyled">
+
+                    % for activity in all_projects_activity:
+                        <li><strong>Actvity Id:</strong> {{activity[0]}}. <strong>Project Id:</strong> <a href="/websuite/project/{{activity[6]}}">{{activity[6]}}</a>, <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}
+                        <br>
+                        <!--<pre>{{activity[4]}}</pre>-->
+                        </li>
+                    % end
+                    </ul>
+                  </div>
+                </div>
+
+
             </div>
         </div>
     </div>
