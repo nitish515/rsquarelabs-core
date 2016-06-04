@@ -18,8 +18,9 @@
             and let the automator take care of everything. </p>
 
         <div class="row">
+            <form role="form"   method="post">
             <div class="col-md-9">
-                <form role="form"   method="post">
+
                     <div class="row">
 
                         <div class="col-md-7">
@@ -36,11 +37,25 @@
                         <div class="col-md-5">
                             <label for="version">Protocol version: {{ new_version }}</label>
                             <input type="hidden" class="form-control" value="{{new_version}}" name="version" id="version">
+
+
+                            <select name="project_id" class="form-control">
+                                %for project in projects_list:
+                                    <option value="{{project[0]}}">{{project[1]}}</option>
+                                %end
+                            </select>
+
+
+
+
                         </div>
 
                     </div>
 
                     <div class="form group">
+                        <label for="receptor">Receptor Path:</label>
+                        <input type="text" class="form-control" name="receptor_file" id="receptor">
+
                         <label for="commands"> Type your commands: </label>
                         %if protocol_initial_data == None:
                             <textarea class="form-control" rows="15" name="protocol_data" id="commands"></textarea>
@@ -49,23 +64,15 @@
                         %end
                     </div>
                     <button type="submit" class="btn btn-success btn-lg"><strong>Execute</strong></button>
-                </form>
+
             </div>
 
             <div class="col-md-3">
 
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle btn-block" type="button" data-toggle="dropdown"
-                    style="margin-top: 25px; text-align: left;">
-                        <strong>Select</strong> <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">gromacs</a> </li>
-                        <li><a href="#">sample-1</a> </li>
-                        <li><a href="#">sample-2</a> </li>
-                        <li><a href="#">sample-3</a> </li>
-                    </ul>
-                </div>
+                 <select name="protocol_class" class="form-control">
+                        <option value="ProteinMin">Protein Minimisation</option>
+                </select>
+
 
                 <h4>Available commands:</h4>
                 <div class="list-group">
@@ -77,6 +84,7 @@
 
                 </div>
             </div>
+            </form>
         </div>
 
         <div class="row">

@@ -50,7 +50,19 @@ from rsquarelabs_core.engines.gromacs.gromacs import ProteinMin
 
 logger.info("Executing the script")
 
-log_file = "RSQ_DB_LOG"
+obj = CLASS_NAME(
+ project_id = "PROJECT_ID",
+ working_dir = "WORKING_DIR",
+ receptor_file = "RECEPTOR_FILE",
+ log_file = "RSQ_DB_LOG",
+ protocol_id = "PROTOCOL_ID"
+)
+
+
+obj.import_files()
+
+obj.write_ions_mdp()
+obj.write_prod_mdp()
 
 """
 
@@ -115,8 +127,10 @@ def automator():
         else:
             new_version = 1
 
+    projects_list = db_object.do_select("select id, title from projects",()).fetchall()
+
     content = open(os.path.join(HTML_DIR, 'automator.html')).read()
-    return template(content, protocol_initial_data=protocol_initial_data, new_version=new_version, now=now)
+    return template(content, protocol_initial_data=protocol_initial_data, new_version=new_version, projects_list=projects_list, now=now)
 
 @app.route('/websuite/automator.html', method='POST')
 def automator_insert():
@@ -124,6 +138,9 @@ def automator_insert():
     name = request.forms.get("name")
     version = request.forms.get("version")
     protocol_data = request.forms.get("protocol_data")
+    project_id = request.forms.get("project_id")
+    protocol_class_name = request.forms.get("protocol_class")
+    receptor_file = request.forms.get("receptor_file")
 
     qs_string = request.query_string
     pro_id = None
@@ -145,10 +162,18 @@ def automator_insert():
     # protocol_data = re.escape(protocol_data)
 
 
-    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete)\
-                        VALUES (?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete,))
+    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id)\
+                        VALUES (?, ?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id,))
 
     protocol_id = db_object.cur.lastrowid
+
+    project_path = db_object.do_select("select path from projects where id=?", (project_id,)).fetchone()[0]
+    working_dir = os.path.join(project_path, "%s_%s" % (protocol_id, version))
+    os.mkdir(working_dir, 0755)
+
+    db_object.conn.execute("UPDATE protocols SET w_dir = ? WHERE id =?",
+                           (working_dir, protocol_id,))
+    db_object.conn.commit()
 
     file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s" % (protocol_id, version, time()))
     py_file_name = "%s.py" %file_name
@@ -157,9 +182,21 @@ def automator_insert():
     db_object.conn.execute("UPDATE protocols SET python_file = ?, log_file = ? WHERE id =?", (py_file_name, log_file_name, protocol_id, ))
     db_object.conn.commit()
 
-    protocol_header = execute_template.replace('RSQ_DB_LOG', log_file_name)
+    protocol_header = execute_template.replace('RSQ_DB_LOG', log_file_name).replace('CLASS_NAME', protocol_class_name).\
+        replace('WORKING_DIR', working_dir).replace('PROJECT_ID', project_id).replace('RECEPTOR_FILE', receptor_file).\
+        replace('PROTOCOL_ID', str(protocol_id))
 
-    protocol_data = protocol_header + protocol_data
+
+    protocol_data_new = ""
+
+    for line in protocol_data.split("\n"):
+        line = line.rstrip().lstrip()
+
+        if line and line.endswith(")"):
+
+            protocol_data_new = protocol_data_new + "\nobj." + line
+
+    protocol_data = protocol_header + protocol_data_new
 
 
     fh = open(py_file_name, 'w')
@@ -184,8 +221,7 @@ def automator_run():
     if "start=" in qs_string:
         start = qs_string.split('start=')[1].split('&')[0]
 
-    print start
-    print type(start)
+
 
     executed_protocol = db_object.do_select(
         "SELECT python_file, log_file from protocols where id=?", (protocol_id, )).fetchone()
@@ -193,11 +229,25 @@ def automator_run():
         subprocess.Popen(['python', executed_protocol[0]], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         redirect('/websuite/automator_run.html?protocol_id=%s&start=false' % (protocol_id))
     elif start == "false":
-        fh = open(executed_protocol[1], 'r')
-        executed_data = fh.read()
+        from time import sleep
+        sleep(2)
+
+        if os.path.isfile(executed_protocol[1]):
+            fh = open(executed_protocol[1], 'r')
+            executed_data = fh.read()
+        else:
+            executed_data = ""
+
+    running_activity = db_object.do_select("select id from project_activity where protocol_id=? and pid_status=?", (protocol_id,"running", )).fetchall()
+
+
+    if len(running_activity) > 0:
+        auto_fresh = True
+    else:
+        auto_fresh = False
 
     content = open(os.path.join(HTML_DIR, 'automator_run.html')).read()
-    return template(content, executed_data=executed_data, auto_refresh=True, now=now)
+    return template(content, executed_data=executed_data, auto_refresh=auto_fresh, now=now)
 
 
 @app.route('/websuite/protocols.html')
@@ -244,13 +294,16 @@ def index():
     recent_protocols = db_object.do_select(
             "select id, name, version from protocols where is_delete=0 ORDER BY id DESC ",()).fetchall()[:2]
 
-
+    running_activity = db_object.do_select("select  id, step_name, project_id  from project_activity where pid_status=?", ("running", )).fetchall()
+    all_running_activity_count = len(running_activity)
 
     content = open(os.path.join(HTML_DIR, 'websuite_index.html')).read()
     return template(content, all_projects_activity=all_projects_activity,
                     all_projects_count=all_projects_count,
                     recent_projects=recent_projects,
-                    recent_protocols = recent_protocols,
+                    recent_protocols=recent_protocols,
+                    running_activity=running_activity,
+                    all_running_activity_count=all_running_activity_count,
                     now=now)
 
 

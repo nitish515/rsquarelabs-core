@@ -38,7 +38,8 @@ class ProteinMin(Gromacs):
         :return:
         """
         protein_file_formats = ['.gro','.pdb']
-        protein_file_path = ""
+        protein_file_path = self.receptor_file_path
+
         while not os.path.isfile(protein_file_path):
             protein_file_path = raw_input("Enter the path for protein file : ")
             for format in protein_file_formats:
@@ -56,7 +57,7 @@ class ProteinMin(Gromacs):
         :return:
         """
         logging.info("Writing mdp files for protein minmisation ie., ions.mdp, minim.mdp")
-        mdp_for_genion = open(self.working_dir + "ions.mdp", "w", 0777)
+        mdp_for_genion = open(os.path.join(self.working_dir, "ions.mdp"), "w", 0777)
         mdp_for_genion.write(str(ions_mdp))
         mdp_for_genion.close()
 
@@ -69,7 +70,7 @@ class ProteinMin(Gromacs):
 
         :return:
         """
-        mdp_for_min = open(self.working_dir + "minim.mdp", "w", 0777)
+        mdp_for_min = open(os.path.join(self.working_dir, "minim.mdp"), "w", 0777)
         mdp_for_min.write(minim_mdp)
         mdp_for_min.close()
 

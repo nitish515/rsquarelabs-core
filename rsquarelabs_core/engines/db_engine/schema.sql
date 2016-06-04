@@ -22,7 +22,9 @@ CREATE TABLE project_activity
     log_file TEXT NOT NULL,
     project_id INTEGER NOT NULL,
     created_at TEXT,
-    updated_at TEXT);
+    updated_at TEXT,
+    pid_status TEXT,
+    protocol_id INT NOT NULL);
 CREATE TABLE project_files
     (id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_name TEXT NOT NULL,
@@ -39,4 +41,6 @@ CREATE TABLE protocols
     protocol_data TEXT NOT NULL,
     is_delete INT,
     python_file TEXT,
-    log_file TEXT)
+    log_file TEXT,
+    w_dir TEXT,
+    project_id INT NOT NULL)

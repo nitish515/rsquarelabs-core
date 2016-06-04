@@ -55,10 +55,20 @@ class Gromacs:
         self.mdp_file_npt = kwargs.get('mdp_file_npt', None)
         self.mdp_file_min = kwargs.get('mdp_file_min', None)
         self.mdp_file = kwargs.get('mdp_file', None)
+        
+        self.protocol_id = kwargs.get('protocol_id', None)
 
         """ Project directory / working directory """
         self.project_id = kwargs.get('project_id', None)
-        self.working_dir = kwargs.get('working_dir', './')
+        self.working_dir = kwargs.get('working_dir', None)
+
+
+
+        if self.working_dir:
+            if os.path.exists(self.working_dir):
+                shutil.rmtree(self.working_dir)
+            print self.working_dir
+            os.mkdir(self.working_dir,0777)
 
         # logger
         self.log_file = kwargs.get("log_file",None)
@@ -124,97 +134,98 @@ class Gromacs:
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        log_file =  self.working_dir + "step-%s.log"%step_no
-        command = pdb2gmx + " -f " + self.working_dir + input_name + " -o " + \
-            self.working_dir + output_name + " -ignh -p " + \
-            self.working_dir + "topol.top -i " + self.working_dir + \
-            "posre.itp -ff gromos53a6 -water spc "
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        log_file =  os.path.join(self.working_dir , "step-%s.log"%step_no)
+        
+        command = pdb2gmx + " -f " + os.path.join(self.working_dir , input_name) + " -o " + \
+            os.path.join(self.working_dir , output_name) + " -ignh -p " + \
+                  os.path.join(self.working_dir, "topol.top" ) + " -i " +  \
+                  os.path.join(self.working_dir ,"posre.itp") + " -ff gromos53a6 -water spc "
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
 
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
-    def make_receptor_ligand_complex(self, step_no,
-                                      receptor_name="receptor.gro",
-                                      ligand_name="ligand.gro",
-                                      step_name="Maing Receptor-Ligand Complex"):
-
-        # set_file_premissions(os.path.join(self.working_dir,input_name))
-        self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        receptor = self.working_dir + receptor_name
-        ligand = self.working_dir + ligand_name
-        system = self.working_dir + "system.gro"
-
-
-        protein_file = open(receptor, "r", 0777)
-        ligand_file = open(ligand, "r",0777)
-        system_file = open(system, 'wa', 0777)
-
-        # get the last line of receptor
-        # get the count of receptor and Ligand files
-        protien_lines_count = len(protein_file.readlines())
-        ligand_lines_count = len(ligand_file.readlines())
-
-
-        # count of the system
-        # TODO: Better name
-        system_count = protien_lines_count + ligand_lines_count - 6
-        protein_file.close()
-        ligand_file.close()
-
-        # open files for reading
-        protein_file = open(receptor, "r", 0777)
-        ligand_file = open(ligand, "r", 0777)
-
-        system_file.write(
-            "System.gro Designed for Simulation by [https://github.com/rsquarelabs/framework]\n")
-        system_file.write(str(system_count) + "\n")
-
-        start_from_line = 3  # or whatever line I need to jump to
-
-        line_counter = 1
-        for line in protein_file:
-            if line_counter in range(start_from_line,
-                                     protien_lines_count):  # start_from_line :
-                # print line
-                system_file.write(line)
-            line_counter += 1
-        protein_file.close()
-
-        line_counter = 1
-        for line in ligand_file:
-            if line_counter in range(start_from_line, ligand_lines_count):
-                # print line
-                system_file.write(line)
-            line_counter += 1
-
-            # get the last line of receptor [the coordinates of the center]
-        protein_file = open(receptor, "r", 0777)
-        last_line = protein_file.readlines()[-1]
-        # print last_line
-        system_file.write(last_line)
-        self.logger.info( "system.gro WAS GENERATED SUCCESSFULLY")
-
-        f1 = open(self.working_dir + 'topol.top', 'r',0777)
-        f2 = open(self.working_dir + 'topol_temp.top', 'w',0777)
-        for line in f1:
-            f2.write(line.replace('; Include water topology',
-                                  '; Include Ligand topology\n #include '
-                                  '"ligand.itp"\n\n\n; Include water topology ')
-                     )
-        f1.close()
-        f2.close()
-        self.logger.info("ligand topolgy added into topol.top ")
-        # swaping the files to get the original file
-        f1 = open(self.working_dir + 'topol.top', 'w',0777)
-        f2 = open(self.working_dir + 'topol_temp.top', 'r',0777)
-        for line in f2:
-            f1.write(line)
-        f1.write("UNK        1\n")
-        f1.close()
-        f2.close()
-        os.unlink(self.working_dir + 'topol_temp.top')
-        self.logger.info("STEP%s: %s, completed. log written to project log " % (step_no, step_name))
-
+    # def make_receptor_ligand_complex(self, step_no,
+    #                                   receptor_name="receptor.gro",
+    #                                   ligand_name="ligand.gro",
+    #                                   step_name="Maing Receptor-Ligand Complex"):
+    # 
+    #     # set_file_premissions(os.path.join(self.working_dir,input_name))
+    #     self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
+    #     receptor = self.working_dir + receptor_name
+    #     ligand = self.working_dir + ligand_name
+    #     system = self.working_dir + "system.gro"
+    # 
+    # 
+    #     protein_file = open(receptor, "r", 0777)
+    #     ligand_file = open(ligand, "r",0777)
+    #     system_file = open(system, 'wa', 0777)
+    # 
+    #     # get the last line of receptor
+    #     # get the count of receptor and Ligand files
+    #     protien_lines_count = len(protein_file.readlines())
+    #     ligand_lines_count = len(ligand_file.readlines())
+    # 
+    # 
+    #     # count of the system
+    #     # TODO: Better name
+    #     system_count = protien_lines_count + ligand_lines_count - 6
+    #     protein_file.close()
+    #     ligand_file.close()
+    # 
+    #     # open files for reading
+    #     protein_file = open(receptor, "r", 0777)
+    #     ligand_file = open(ligand, "r", 0777)
+    # 
+    #     system_file.write(
+    #         "System.gro Designed for Simulation by [https://github.com/rsquarelabs/framework]\n")
+    #     system_file.write(str(system_count) + "\n")
+    # 
+    #     start_from_line = 3  # or whatever line I need to jump to
+    # 
+    #     line_counter = 1
+    #     for line in protein_file:
+    #         if line_counter in range(start_from_line,
+    #                                  protien_lines_count):  # start_from_line :
+    #             # print line
+    #             system_file.write(line)
+    #         line_counter += 1
+    #     protein_file.close()
+    # 
+    #     line_counter = 1
+    #     for line in ligand_file:
+    #         if line_counter in range(start_from_line, ligand_lines_count):
+    #             # print line
+    #             system_file.write(line)
+    #         line_counter += 1
+    # 
+    #         # get the last line of receptor [the coordinates of the center]
+    #     protein_file = open(receptor, "r", 0777)
+    #     last_line = protein_file.readlines()[-1]
+    #     # print last_line
+    #     system_file.write(last_line)
+    #     self.logger.info( "system.gro WAS GENERATED SUCCESSFULLY")
+    # 
+    #     f1 = open(self.working_dir + 'topol.top', 'r',0777)
+    #     f2 = open(self.working_dir + 'topol_temp.top', 'w',0777)
+    #     for line in f1:
+    #         f2.write(line.replace('; Include water topology',
+    #                               '; Include Ligand topology\n #include '
+    #                               '"ligand.itp"\n\n\n; Include water topology ')
+    #                  )
+    #     f1.close()
+    #     f2.close()
+    #     self.logger.info("ligand topolgy added into topol.top ")
+    #     # swaping the files to get the original file
+    #     f1 = open(self.working_dir + 'topol.top', 'w',0777)
+    #     f2 = open(self.working_dir + 'topol_temp.top', 'r',0777)
+    #     for line in f2:
+    #         f1.write(line)
+    #     f1.write("UNK        1\n")
+    #     f1.close()
+    #     f2.close()
+    #     os.unlink(self.working_dir + 'topol_temp.top')
+    #     self.logger.info("STEP%s: %s, completed. log written to project log " % (step_no, step_name))
+    # 
 
     def editconf(self, step_no,
                  input_name="system.gro",
@@ -222,13 +233,15 @@ class Gromacs:
                  step_name = "Defining the Box"):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
+        
         self.logger.info("STEP%s: Attempting the step %s " %(step_no,step_name))
-        log_file = self.working_dir + "step-%s.log" % step_no
-        command = editconf + " -f " + self.working_dir + input_name + " -o " + \
-            self.working_dir + output_name + " -bt cubic -d 1 -c "
+        log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+        
+        command = editconf + " -f " + os.path.join(self.working_dir, input_name) + " -o " + \
+            os.path.join(self.working_dir , output_name) + " -bt cubic -d 1 -c "
 
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -236,11 +249,11 @@ class Gromacs:
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        log_file = self.working_dir + "step-%s.log" % step_no
-        command = solvate + " -cp " + self.working_dir + input_name + " -p " + \
-            self.working_dir + "topol.top -cs spc216.gro -o " + \
-            self.working_dir + output_name
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+        command = solvate + " -cp " + os.path.join(self.working_dir, input_name) + " -p " + \
+                  os.path.join(self.working_dir, "topol.top") + " -cs spc216.gro -o " + \
+            os.path.join(self.working_dir , output_name)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -248,12 +261,12 @@ class Gromacs:
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        log_file = self.working_dir + "step-%s.log" % step_no
-        command = genion + " -s " + self.working_dir + input_name + " -o " + \
-                  self.working_dir + output_name + " -p " + self.working_dir + \
-                  "topol.top -nname CL -pname NA -neutral << EOF\nSOL\nEOF"
+        log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+        command = genion + " -s " + os.path.join(self.working_dir, input_name) + " -o " + \
+                  os.path.join(self.working_dir , output_name) + " -p " + \
+                  os.path.join(self.working_dir, "topol.top") + " -nname CL -pname NA -neutral << EOF\nSOL\nEOF"
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -261,13 +274,13 @@ class Gromacs:
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        log_file = self.working_dir + "step-%s.log" % step_no
+        log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
 
-        command = grompp + " -f " + self.working_dir + mdp_file + " -c " + \
-            self.working_dir + input_name + " -p " + self.working_dir + \
-            "topol.top -o " + self.working_dir + output_name + " -po " + \
-            self.working_dir + "mdout.mdp -maxwarn 3"
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        command = grompp + " -f " + os.path.join(self.working_dir, mdp_file) + " -c " + \
+            os.path.join(self.working_dir, input_name) + " -p " + \
+                  os.path.join(self.working_dir , "topol.top")+ " -o " + os.path.join(self.working_dir , output_name) + " -po " + \
+                  os.path.join(self.working_dir, "mdout.mdp") + " -maxwarn 3"
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -277,11 +290,11 @@ class Gromacs:
         input_with_no_extension = input_name.split(".")[0]
 
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
-        log_file = self.working_dir + "step-%s.log" % step_no
-        command = mdrun + " -v  -s " + self.working_dir + input_with_no_extension + ".tpr -c " + \
-                  self.working_dir + input_with_no_extension+".gro -o " + self.working_dir + \
-                  input_with_no_extension +".trr -e " + self.working_dir + input_with_no_extension +".edr -x " + \
-                  self.working_dir + input_with_no_extension + ".xtc -g " + self.working_dir + \
-                  input_with_no_extension + ".log  -nt " + str(nt)
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id)
+        log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+        command = mdrun + " -v  -s " + os.path.join(self.working_dir, input_with_no_extension) + ".tpr -c " + \
+                  os.path.join(self.working_dir , input_with_no_extension) +".gro -o " + \
+                  os.path.join(self.working_dir, input_with_no_extension) +".trr -e " + os.path.join(self.working_dir , input_with_no_extension) +".edr -x " + \
+                  os.path.join(self.working_dir, input_with_no_extension) + ".xtc -g " + \
+                  os.path.join(self.working_dir, input_with_no_extension) + ".log  -nt " + str(nt)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
