@@ -73,8 +73,9 @@ def get_file_info(file):
     file_name = file.split("/")[-1]
     return [file_name, content]
 
-def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id):
+def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id, protocol_id):
     logger.info( "INFO: Attempting to execute [STEP:%s]'%s'" %(step_no, step_name))
+
     try:
         ## insert the command into the db with status (to_run)
         extra = None
@@ -106,17 +107,22 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
-        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at )\
-         VALUES(?,?,?,?,?,?, ?, ?)'
+        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at, protocol_id )\
+         VALUES(?,?,?,?,?,?, ?, ?,?)'
 
 
-        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), ))
 
+        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), protocol_id))
 
+        logger.info(log_file)
         fh_stdout = open(log_file, 'wb')
         fh_stderr = open("%s.err"%log_file, 'wb')
 
-        process = Popen(cmd_args, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        db_object.conn.execute("UPDATE project_activity SET pid_status =? where id=? ",
+                               ("running", cur.lastrowid))
+        db_object.conn.commit()
+
+        process = subprocess.Popen(cmd_args, stdout=PIPE, stderr=PIPE, stdin=PIPE)
 
         if extra:
             process.stdin.write(extra)
@@ -125,6 +131,7 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
         fh_stdout.write(stdout)
         fh_stderr.write(stderr)
+        print process.pid
 
         logger.info("Runing the stepNo: %s, StepName: %s with process id %s"%(step_no, step_name, process.pid))
         ret = process.poll()
@@ -132,8 +139,8 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
         print "id of data insertion ",cur.lastrowid
 
         if process.pid is not None:
-            db_object.cur.execute( "UPDATE project_activity SET pid ='%s' where id='%s' " %(process.pid, cur.lastrowid))
-
+            db_object.conn.execute("UPDATE project_activity SET pid =? where id=? ", (process.pid, cur.lastrowid))
+            db_object.conn.commit()
 
         ret_data = {}
         ret_data['pid'] = process.pid
@@ -142,18 +149,26 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
 
         if ret == None or ret== 0:
-            logger.info(  'Completed!')
+            logger.info('Completed!')
+            db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("done", process.pid, ))
+            db_object.conn.commit()
             return ret_data
+
 
 
         else:
             print "HeadsUP: Killed by Signal"
-            logger.info( "HEADS UP: Killed by signal :(", -ret)
+            logger.info( "HEADS UP: Killed by signal :(" )
+            db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("killed", process.pid,))
+            db_object.conn.commit()
+            # return ret_data
             sys.exit()
 
     except Exception as e:
         logger.error(e)
         logger.info( "HEADS UP: Command failed")
+        db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("failed", process.pid,))
+        db_object.conn.commit()
         sys.exit()
 
 
@@ -220,8 +235,9 @@ def run_process(step_no, step_name, command, tool_name, log_file, project_id):
         print "id of data insertion ",cur.lastrowid
 
         if process.pid is not None:
-            db_object.cur.execute( "UPDATE project_activity SET pid ='%s' where id='%s' " %(process.pid, cur.lastrowid))
-
+            db_object.conn.execute("UPDATE project_activity SET pid =?, pid_status =? where id=? ",
+                                   (process.pid, "Running", cur.lastrowid))
+            db_object.conn.commit()
 
         ret_data = {}
         ret_data['pid'] = process.pid
@@ -230,16 +246,22 @@ def run_process(step_no, step_name, command, tool_name, log_file, project_id):
 
         if ret == None:
             logger.info(  'Completed!')
+            db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("Done", process.pid,))
+            db_object.conn.commit()
             return ret_data
 
 
         else:
             logger.info( "HEADS UP: Killed by signal :(", -ret)
+            db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("Killed", process.pid,))
+            db_object.conn.commit()
             sys.exit()
 
     except Exception as e:
         logger.error(e)
         logger.info( "HEADS UP: Command failed")
+        db_object.conn.execute("UPDATE project_activity SET pid_status =? where pid=? ", ("Failed", process.pid,))
+        db_object.conn.commit()
         sys.exit()
 
 
