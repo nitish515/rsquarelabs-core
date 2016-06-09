@@ -73,7 +73,7 @@ def get_file_info(file):
     file_name = file.split("/")[-1]
     return [file_name, content]
 
-def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id, protocol_id):
+def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id, protocol_id, parent_method_name, parent_method_serial):
     logger.info( "INFO: Attempting to execute [STEP:%s]'%s'" %(step_no, step_name))
 
     try:
@@ -107,12 +107,12 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
-        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at, protocol_id )\
-         VALUES(?,?,?,?,?,?, ?, ?,?)'
+        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at, protocol_id, executed_method_name, executed_method_serial )\
+         VALUES(?,?,?,?,?,?, ?, ?,?, ?, ?)'
 
 
 
-        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), protocol_id))
+        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), protocol_id, parent_method_name, parent_method_serial))
 
         logger.info(log_file)
         fh_stdout = open(log_file, 'wb')

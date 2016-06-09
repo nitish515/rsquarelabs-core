@@ -24,7 +24,9 @@ CREATE TABLE project_activity
     created_at TEXT,
     updated_at TEXT,
     pid_status TEXT,
-    protocol_id INT NOT NULL);
+    protocol_id INT NOT NULL,
+    executed_method_name TEXT NOT NULL,
+    executed_method_serial INT NOT NULL);
 CREATE TABLE project_files
     (id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_name TEXT NOT NULL,

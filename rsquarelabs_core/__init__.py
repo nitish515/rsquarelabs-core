@@ -1,7 +1,7 @@
 __author__ = 'rrmerugu'
 
 import os, sys, subprocess, pip, platform
-from .config import RSQ_PROJECTS_HOME, RSQ_HOME, RSQ_DB_PATH, RSQ_PROJECTS_CONFIG, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH
+from .config import RSQ_PROJECTS_HOME, RSQ_HOME, RSQ_DB_PATH, RSQ_PROJECTS_CONFIG, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_EXPORT_PATH
 
 if not os.path.exists(RSQ_PROJECTS_HOME):
     os.mkdir(RSQ_PROJECTS_HOME,0755)
@@ -11,6 +11,9 @@ if not os.path.exists(RSQ_HOME):
 
 if not os.path.exists(RSQ_SCRIPT_PATH):
     os.mkdir(RSQ_SCRIPT_PATH,0755)
+
+if not os.path.exists(RSQ_EXPORT_PATH):
+    os.mkdir(RSQ_EXPORT_PATH,0755)
 
 if not os.path.exists(RSQ_BACKUP_PATH):
     os.mkdir(RSQ_BACKUP_PATH,0755)
