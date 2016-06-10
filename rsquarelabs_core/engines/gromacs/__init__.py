@@ -1,4 +1,4 @@
-import shutil, sys, os
+import shutil, sys, os, inspect
 from rsquarelabs_core.utils import run_process, run_and_record_process, get_file_info, import_files, \
     set_file_premissions
 import logging
@@ -116,31 +116,33 @@ class Gromacs:
         :return:
         """
         if self.receptor_file_path:
-            import_files(self.receptor_file_path, self.working_dir, self.project_id)
+            import_files(self.receptor_file_path, self.working_dir, self.project_id, self.protocol_id)
             os.chmod(self.working_dir, 0777)
 
         if self.ligand_file_path:
-            import_files(self.ligand_file_path, self.working_dir, self.project_id)
+            import_files(self.ligand_file_path, self.working_dir, self.project_id, self.protocol_id)
 
         if self.ligand_topology_file_path:
-            import_files(self.ligand_topology_file_path, self.working_dir, self.project_id)
+            import_files(self.ligand_topology_file_path, self.working_dir, self.project_id, self.protocol_id)
 
 
 
     def pdb2gmx(self, step_no,
                 input_name="receptor.pdb",
                 output_name="receptor.gro",
-                step_name="Topology Generation"):
+                step_name="Topology Generation", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file =  os.path.join(self.working_dir , "step-%s.log"%step_no)
-        
+
+        command_method = inspect.stack()[0][3]
+
         command = pdb2gmx + " -f " + os.path.join(self.working_dir , input_name) + " -o " + \
             os.path.join(self.working_dir , output_name) + " -ignh -p " + \
                   os.path.join(self.working_dir, "topol.top" ) + " -i " +  \
                   os.path.join(self.working_dir ,"posre.itp") + " -ff gromos53a6 -water spc "
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
 
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
@@ -230,71 +232,84 @@ class Gromacs:
     def editconf(self, step_no,
                  input_name="system.gro",
                  output_name="newbox.gro",
-                 step_name = "Defining the Box"):
+                 step_name = "Defining the Box", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         
         self.logger.info("STEP%s: Attempting the step %s " %(step_no,step_name))
         log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
-        
+
+        command_method = inspect.stack()[0][3]
+
         command = editconf + " -f " + os.path.join(self.working_dir, input_name) + " -o " + \
             os.path.join(self.working_dir , output_name) + " -bt cubic -d 1 -c "
 
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
-    def solvate(self, step_no, input_name="newbox.gro", output_name="solv.gro", step_name = "Solvating the Box"):
+    def solvate(self, step_no, input_name="newbox.gro", output_name="solv.gro", step_name = "Solvating the Box", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+
+        command_method = inspect.stack()[0][3]
+
         command = solvate + " -cp " + os.path.join(self.working_dir, input_name) + " -p " + \
                   os.path.join(self.working_dir, "topol.top") + " -cs spc216.gro -o " + \
             os.path.join(self.working_dir , output_name)
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
-    def genion(self, step_no, input_name="ions.tpr", output_name="solv_ions.gro", step_name = "Adding Ions to Neutralise the System"):
+    def genion(self, step_no, input_name="ions.tpr", output_name="solv_ions.gro", step_name = "Adding Ions to Neutralise the System", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+
+        command_method = inspect.stack()[0][3]
+
         command = genion + " -s " + os.path.join(self.working_dir, input_name) + " -o " + \
                   os.path.join(self.working_dir , output_name) + " -p " + \
                   os.path.join(self.working_dir, "topol.top") + " -nname CL -pname NA -neutral << EOF\nSOL\nEOF"
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
-    def grompp(self,  step_no, input_name=None, output_name=None, mdp_file=None,  step_name = "Gromacs Pre-processing"):
+    def grompp(self,  step_no, input_name=None, output_name=None, mdp_file=None,  step_name = "Gromacs Pre-processing", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+
+        command_method = inspect.stack()[0][3]
 
         command = grompp + " -f " + os.path.join(self.working_dir, mdp_file) + " -c " + \
             os.path.join(self.working_dir, input_name) + " -p " + \
                   os.path.join(self.working_dir , "topol.top")+ " -o " + os.path.join(self.working_dir , output_name) + " -po " + \
                   os.path.join(self.working_dir, "mdout.mdp") + " -maxwarn 3"
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
-    def mdrun(self, step_no, input_name=None, nt=1, step_name="mdrun "):
+    def mdrun(self, step_no, input_name=None, nt=1, step_name="mdrun ", parent_method_name=None, parent_method_serial=1):
 
         set_file_premissions(os.path.join(self.working_dir,input_name))
         input_with_no_extension = input_name.split(".")[0]
 
         self.logger.info("STEP%s: Attempting the step %s " % (step_no, step_name))
         log_file = os.path.join(self.working_dir , "step-%s.log"%step_no)
+
+        command_method = inspect.stack()[0][3]
+
         command = mdrun + " -v  -s " + os.path.join(self.working_dir, input_with_no_extension) + ".tpr -c " + \
                   os.path.join(self.working_dir , input_with_no_extension) +".gro -o " + \
                   os.path.join(self.working_dir, input_with_no_extension) +".trr -e " + os.path.join(self.working_dir , input_with_no_extension) +".edr -x " + \
                   os.path.join(self.working_dir, input_with_no_extension) + ".xtc -g " + \
                   os.path.join(self.working_dir, input_with_no_extension) + ".log  -nt " + str(nt)
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))

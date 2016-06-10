@@ -1,4 +1,4 @@
-import shutil, argparse, sys, os
+import shutil, argparse, sys, os, inspect
 from rsquarelabs_core.utils import run_process, get_file_info, import_files
 from core.messages import welcome_message, backup_folder_already_exists, \
     write_em_mpd_data, create_em_mdp_data
@@ -45,7 +45,7 @@ class ProteinMin(Gromacs):
             for format in protein_file_formats:
                 if protein_file_path.endswith(format) and os.path.isfile(protein_file_path):
                     break
-        import_files(protein_file_path, self.working_dir, self.project_id )
+        import_files(protein_file_path, self.working_dir, self.project_id, self.protocol_id )
 
     def write_ions_mdp(self):
         """
@@ -74,25 +74,25 @@ class ProteinMin(Gromacs):
         mdp_for_min.write(minim_mdp)
         mdp_for_min.close()
 
-
-
+    # TODO - Add run_and_record_process() to write_ions_mdp() and write_prod_mdp()
 
     def create_topology(self):
-        self.pdb2gmx(step_no=1, input_name="receptor.pdb", output_name="receptor.gro", step_name="Creating topology for Protein")
+        self.pdb2gmx(step_no=1, input_name="receptor.pdb", output_name="receptor.gro", step_name="Creating topology for Protein",  parent_method_name="create_topology()", parent_method_serial=1)
 
     def create_water_box(self):
-        self.editconf(step_no=2, input_name="receptor.gro", output_name="newbox.gro", step_name="Defining the box")
-        self.solvate(step_no=3, input_name="newbox.gro", output_name="solv.gro", step_name="Solvating the box")
+
+        self.editconf(step_no=2, input_name="receptor.gro", output_name="newbox.gro", step_name="Defining the box", parent_method_name="create_water_box()", parent_method_serial=1)
+        self.solvate(step_no=3, input_name="newbox.gro", output_name="solv.gro", step_name="Solvating the box", parent_method_name="create_water_box()", parent_method_serial=2)
 
     def neutralize_system(self):
         self.write_ions_mdp()
-        self.grompp(step_no=4, input_name="solv.gro", output_name="ions.tpr", mdp_file="ions.mdp", step_name="Pre-processing to check the number of ions needed" )
-        self.genion(step_no=5, input_name="ions.tpr", output_name="solv_ions.gro", step_name="Neutralizing the System")
+        self.grompp(step_no=4, input_name="solv.gro", output_name="ions.tpr", mdp_file="ions.mdp", step_name="Pre-processing to check the number of ions needed", parent_method_name="neutralize_system()",parent_method_serial=1)
+        self.genion(step_no=5, input_name="ions.tpr", output_name="solv_ions.gro", step_name="Neutralizing the System", parent_method_name="neutralize_system()", parent_method_serial=2)
 
     def minimize(self):
         self.write_prod_mdp()
-        self.grompp(step_no=6, input_name="solv_ions.gro", output_name="em.tpr", mdp_file="minim.mdp", step_name="Pre-processing the system before Minimisation")
-        self.mdrun(step_no=7, input_name="em.tpr", nt=1, step_name="Final Minimisation")
+        self.grompp(step_no=6, input_name="solv_ions.gro", output_name="em.tpr", mdp_file="minim.mdp", step_name="Pre-processing the system before Minimisation", parent_method_name="minimize()", parent_method_serial=1)
+        self.mdrun(step_no=7, input_name="em.tpr", nt=1, step_name="Final Minimisation", parent_method_name="minimize()", parent_method_serial=2)
 
 
 
@@ -138,7 +138,7 @@ class ProteinLigMin(object):
             print 'Can\'t use both the verbose and quiet flags together'
             sys.exit()
 
-    def import_files(project_path, project_id):
+    def import_files(project_path, project_id, protocol_id):
 
         """
         This will import the files into the projects into the path. All the files imported via this method should be backed to

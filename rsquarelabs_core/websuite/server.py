@@ -5,7 +5,7 @@ from datetime import datetime
 from time import time
 import bottle as bottle2
 from bottle import Bottle, request, static_file, template, redirect, error
-
+from yaml import dump, load
 
 
 BASE_DIR    = os.path.join(os.path.dirname(os.path.dirname(__file__)),'websuite')
@@ -17,7 +17,7 @@ JS_DIR      = os.path.join(STATIC_DIR, 'js')
 
 from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
-from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_PROJECTS_HOME
+from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
 
 
 
@@ -104,11 +104,12 @@ def automator():
     # pro_ver = 1
     pro_id = None
     protocol_initial_data = None
+    project_recreate_data = None
 
     if "pro_id=" in qs_string:
         pro_id = qs_string.split('pro_id=')[1].split('&')[0]
 
-    print pro_id
+
     if pro_id:
         protocol_initial_data = db_object.do_select("SELECT id, name, version, parent_protocol, master_protocol, protocol_data from protocols WHERE id =?",
                                                     (pro_id,)).fetchone()
@@ -127,10 +128,34 @@ def automator():
         else:
             new_version = 1
 
-    projects_list = db_object.do_select("select id, title from projects",()).fetchall()
+    if "project_id=" in qs_string:
+        project_recreate_data = "\n"
+
+        project_id = qs_string.split('project_id=')[1].split('&')[0]
+        projects_list = db_object.do_select("select id, title, is_delete from projects where id=?", (project_id, )).fetchall()
+
+        max_step = \
+        db_object.do_select("select MAX(step_no) from project_activity where project_id=?", (project_id,)).fetchone()[0]
+
+        for step_no in range(1, int(max_step)+1):
+            project_recreate_activity = db_object.do_select("SELECT parent_method_name, parent_method_serial from project_activity WHERE pid_status=? and step_no=? and \
+                    project_id=? ORDER BY id DESC", ("done", step_no, project_id, )).fetchone()
+            print project_recreate_activity
+            if project_recreate_activity[1] == 1:
+                project_recreate_data = project_recreate_data + str(project_recreate_activity[0]) + "\n"
+            elif project_recreate_activity == None:
+                project_recreate_data = None
+            #print project_recreate_data
+
+    else:
+        projects_list = db_object.do_select("select id, title, is_delete from projects",()).fetchall()
 
     content = open(os.path.join(HTML_DIR, 'automator.html')).read()
-    return template(content, protocol_initial_data=protocol_initial_data, new_version=new_version, projects_list=projects_list, now=now)
+    return template(content, protocol_initial_data=protocol_initial_data,
+                    new_version=new_version,
+                    projects_list=projects_list,
+                    project_recreate_data=project_recreate_data,
+                    now=now)
 
 @app.route('/websuite/automator.html', method='POST')
 def automator_insert():
@@ -156,14 +181,16 @@ def automator_insert():
         if master_protocol == 0:
             master_protocol = pro_id
 
+    # if "project_id=" in qs_string:
+    #     project_id = qs_string.split('project_id=')[1].split('&')[0]
 
     is_delete = 0
     # import re
     # protocol_data = re.escape(protocol_data)
 
 
-    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id)\
-                        VALUES (?, ?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id,))
+    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id, class_name)\
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id, protocol_class_name, ))
 
     protocol_id = db_object.cur.lastrowid
 
@@ -336,6 +363,144 @@ def projects_list():
 
     return template(content, projects_list=projects_data, now=now)
 
+@app.route('/websuite/export.html/:project_id')
+def export(project_id):
+    now = datetime.now().strftime(footer_timeformat)
+
+    content = open(os.path.join(HTML_DIR, 'export.html')).read()
+    return template(content, now=now)
+
+
+@app.route('/websuite/export.html/:project_id', method='POST')
+def export_yaml(project_id):
+    now = datetime.now().strftime(footer_timeformat)
+    # qs_string = request.query_string
+    #
+    # if "project_id=" in qs_string:
+    #     project_id = qs_string.split('project_id=')[1].split('&')[0]
+    #
+    # if project_id != None:
+    file_mode = request.forms.get('export')
+    # print file_mode
+    if file_mode:
+        yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s.yaml"%(project_id))
+
+        # export_steps_data = []
+        export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?", (project_id, )).fetchone()
+        # export_file_data = db_object.do_select("select  file_name, file_content  from project_files where project_id=? ORDER BY id DESC", (project_id, )).fetchone()
+
+        export_protocol_data = db_object.do_select("select id, name, class_name from protocols where project_id=?", (project_id, )).fetchall()
+
+        protocols_data = {}
+        No_protocols = len(export_protocol_data) + 1
+
+        if file_mode == "recreate":
+            No_protocols = 1
+
+        for protocol_order in range(1, No_protocols):
+            # print export_protocol_data[protocol_order][0]
+            export_activity_data = db_object.do_select("select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?", (int(export_protocol_data[protocol_order-1][0]), )).fetchall()
+            export_file_data = db_object.do_select(
+                "select file_name, file_content from project_files where protocol_id = ? ",
+                (int(export_protocol_data[protocol_order-1][0]), )).fetchone()
+            # print export_file_data
+
+            order = 0
+            activity_data = []
+
+            for activity_order in range(1, len(export_activity_data)+1):
+                if int(export_activity_data[activity_order-1][1]) == 1:
+                    order += 1
+                    activity_data.append({order: str(export_activity_data[activity_order-1][0])})
+
+            protocol_data = {
+                protocol_order:
+                    {
+                        "protocol_name": str(export_protocol_data[protocol_order-1][1]),
+                        "class_name": str(export_protocol_data[protocol_order-1][2]),
+                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                        "steps": activity_data
+                    }
+
+            }
+
+            protocols_data.update(protocol_data)
+
+
+
+        # if file_mode == "everything":
+        #     export_steps_data = db_object.do_select("select step_no, step_name, command from project_activity where project_id=?", (project_id, )).fetchall()
+        # elif file_mode == "recreate":
+        #     max_step = db_object.do_select("select MAX(step_no) from project_activity where project_id=?", (project_id, )).fetchone()[0]
+        #     # print int(max_step)+1
+        #     for step_no in range(1, int(max_step)+1):
+        #         step_data = db_object.do_select("SELECT step_no, step_name, command from project_activity WHERE pid_status=? and step_no=? and \
+        #                 project_id=? ORDER BY id DESC", ("done", step_no, project_id,)).fetchone()
+        #         export_steps_data.append(step_data)
+        #     # print export_steps_data
+
+        data = {
+            "title": str(export_project_data[0]),
+            "tag": str(export_project_data[1]),
+            "user_email": str(export_project_data[2]),
+            "short_note": str(export_project_data[3]),
+            "protocols": protocols_data
+        }
+
+        # file_data = {
+        #     "files": {
+        #         str(export_file_data[0]): str(export_file_data[1])
+        #     }
+        # }
+
+        # data.update(file_data)
+
+        # steps_data = {
+        #         "steps":  []
+        #     }
+        # for step in export_steps_data:
+        #     steps_data['steps'].append({int(step[0]): {str(step[1]): str(step[2])}})
+        #
+        # data.update(steps_data)
+
+        with open(yaml_file, 'w') as file_handler:
+            dump(data, file_handler, default_flow_style=False)
+
+        redirect('/websuite/download/export_%s.yaml'%(project_id))
+
+
+@app.route('/websuite/download/<filename:path>')
+def download(filename):
+    return static_file(filename, root='%s'% (RSQ_EXPORT_PATH), download=filename)
+
+@app.route('/websuite/import.html')
+def import_yaml():
+    now = datetime.now().strftime(footer_timeformat)
+
+    content = open(os.path.join(HTML_DIR, 'import.html')).read()
+    return template(content, now=now)
+
+
+@app.route('/websuite/import.html', method='POST')
+def import_project():
+    yaml_file = request.files.get("upload")
+
+    print yaml_file.filename
+    # with open(str(yaml_file.file), 'r') as file_handler:
+    #     data = load(file_handler)
+    yaml_file.save(RSQ_IMPORT_PATH, overwrite=True)
+    import_file = os.path.join(RSQ_IMPORT_PATH, str(yaml_file.filename))
+
+    print import_file
+
+    with open(import_file, 'r') as file_handler:
+        data = load(file_handler)
+    slug = "%s_%s"%(data['title'], time())
+    db_object.do_insert("INSERT INTO PROJECTS (title, tags, user_email, short_note, slug, date, is_delete)\
+        VALUES (?, ?, ?, ?, ?, ?, ?) ", (data['title'], data['tags'], data['user_email'], data['short_note'], slug, datetime.now().strftime("%Y-%m-%d %H:%M"), 0))
+
+    redirect('/websuite/import.html')
+
 
 @app.route('/websuite/project/:project_id')
 def projects_view(project_id):
@@ -346,6 +511,7 @@ def projects_view(project_id):
     project_activity_data = db_object.do_select(
             "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,))
 
+    protocols_list = db_object.do_select("select id, name from protocols where project_id=?", (project_id, )).fetchall()
 
     if project_data is None:
         project_log= None
@@ -361,7 +527,7 @@ def projects_view(project_id):
             if not file.startswith("#") and not file.endswith("#"):
                 file_list_filter.append(file)
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    return template(content, file_list=file_list_filter, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data, now=now)
+    return template(content, file_list=file_list_filter, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data,protocols_list=protocols_list, now=now)
 
 
 @app.route('/websuite/project/:project_id/activity')

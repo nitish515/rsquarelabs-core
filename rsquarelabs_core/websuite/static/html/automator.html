@@ -41,7 +41,9 @@
 
                             <select name="project_id" class="form-control">
                                 %for project in projects_list:
-                                    <option value="{{project[0]}}">{{project[1]}}</option>
+                                    % if project[2] == 0:
+                                        <option value="{{project[0]}}">{{project[1]}}</option>
+                                    %end
                                 %end
                             </select>
 
@@ -57,10 +59,12 @@
                         <input type="text" class="form-control" name="receptor_file" id="receptor">
 
                         <label for="commands"> Type your commands: </label>
-                        %if protocol_initial_data == None:
-                            <textarea class="form-control" rows="15" name="protocol_data" id="commands"></textarea>
-                        %else:
+                        %if protocol_initial_data != None:
                             <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{protocol_initial_data[5]}}</textarea>
+                        %elif project_recreate_data != None:
+                            <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{project_recreate_data}}</textarea>
+                        %else:
+                            <textarea class="form-control" rows="15" name="protocol_data" id="commands"></textarea>
                         %end
                     </div>
                     <button type="submit" class="btn btn-success btn-lg"><strong>Execute</strong></button>

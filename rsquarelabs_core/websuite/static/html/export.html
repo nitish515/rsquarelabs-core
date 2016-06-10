@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>RMV | RSQUARE LABS Automator </title>
+</head>
+<body>
+% include('header.html')
+    <div class="container pageview">
+        <h2>Export</h2>
+        <p>Get an instant download of worked project progress through export.</p>
+        <h4>What do you want to export ?</h4>
+        <form role="form" method="post">
+            <label class="radio-inline">
+                <input type="radio" name="export" value="everything">Everything
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="export" value="recreate">Only recreate files
+            </label>
+            <button type="submit" class="btn btn-info btn-lg"><strong>Export</strong></button>
+        </form>
+
+    </div>
+
+
+% include('footer.html', now=now)
+</body>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</html>

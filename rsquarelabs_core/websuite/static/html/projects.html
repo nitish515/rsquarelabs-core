@@ -42,7 +42,10 @@
                                <th>{{project[5]}}</th>
                                <th>{{project[6]}}</th>
                                <th>{{project[8]}}</th>
-                               <th><a href="/websuite/projects.html?backup_id={{project[0]}}" class="btn btn-primary" role="button"> Back up </a> <a href="/websuite/projects.html?delete_id={{project[0]}}" class="btn btn-danger" role="button"> Delete </a> </th>
+                               <th><a href="/websuite/projects.html?backup_id={{project[0]}}" class="btn btn-primary" role="button"> Back up </a>
+                                   <a href="/websuite/projects.html?delete_id={{project[0]}}" class="btn btn-danger" role="button"> Delete </a>
+                                   <a href="/websuite/automator.html?project_id={{project[0]}}" class="btn btn-info" role="button"> Recreate </a>
+                               </th>
                              </tr>
                         %end
                     %end
