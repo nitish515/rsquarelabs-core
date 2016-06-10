@@ -1,4 +1,4 @@
-import shutil, argparse, sys, os
+import shutil, argparse, sys, os, inspect
 from rsquarelabs_core.utils import run_process, get_file_info, import_files
 from core.messages import welcome_message, backup_folder_already_exists, \
     write_em_mpd_data, create_em_mdp_data
@@ -45,7 +45,7 @@ class ProteinMin(Gromacs):
             for format in protein_file_formats:
                 if protein_file_path.endswith(format) and os.path.isfile(protein_file_path):
                     break
-        import_files(protein_file_path, self.working_dir, self.project_id )
+        import_files(protein_file_path, self.working_dir, self.project_id, self.protocol_id )
 
     def write_ions_mdp(self):
         """
@@ -86,7 +86,7 @@ class ProteinMin(Gromacs):
 
     def neutralize_system(self):
         self.write_ions_mdp()
-        self.grompp(step_no=4, input_name="solv.gro", output_name="ions.tpr", mdp_file="ions.mdp", step_name="Pre-processing to check the number of ions needed", parent_method_name="neutralize_system()", parent_method_serial=1)
+        self.grompp(step_no=4, input_name="solv.gro", output_name="ions.tpr", mdp_file="ions.mdp", step_name="Pre-processing to check the number of ions needed", parent_method_name="neutralize_system()",parent_method_serial=1)
         self.genion(step_no=5, input_name="ions.tpr", output_name="solv_ions.gro", step_name="Neutralizing the System", parent_method_name="neutralize_system()", parent_method_serial=2)
 
     def minimize(self):
@@ -138,7 +138,7 @@ class ProteinLigMin(object):
             print 'Can\'t use both the verbose and quiet flags together'
             sys.exit()
 
-    def import_files(project_path, project_id):
+    def import_files(project_path, project_id, protocol_id):
 
         """
         This will import the files into the projects into the path. All the files imported via this method should be backed to

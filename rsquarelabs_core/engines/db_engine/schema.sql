@@ -25,15 +25,17 @@ CREATE TABLE project_activity
     updated_at TEXT,
     pid_status TEXT,
     protocol_id INT NOT NULL,
-    executed_method_name TEXT NOT NULL,
-    executed_method_serial INT NOT NULL);
+    parent_method_name TEXT NOT NULL,
+    parent_method_serial INT NOT NULL,
+    command_method TEXT NOT NULL);
 CREATE TABLE project_files
     (id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_name TEXT NOT NULL,
     file_content BLOB NOT NULL,
     project_id INTEGER NOT NULL,
     created_at TEXT,
-    updated_at TEXT);
+    updated_at TEXT,
+    protocol_id INT NOT NULL);
 CREATE TABLE protocols
     (id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -45,4 +47,5 @@ CREATE TABLE protocols
     python_file TEXT,
     log_file TEXT,
     w_dir TEXT,
-    project_id INT NOT NULL)
+    project_id INT NOT NULL,
+    class_name TEXT NOT NULL)

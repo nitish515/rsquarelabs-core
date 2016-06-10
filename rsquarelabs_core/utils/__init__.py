@@ -38,7 +38,7 @@ def set_file_premissions(file_path):
         exit()
 
 
-def import_files(file_path, project_path, project_id):
+def import_files(file_path, project_path, project_id, protocol_id):
     """
     This will
     1. import the files into working dir
@@ -56,9 +56,9 @@ def import_files(file_path, project_path, project_id):
     file_info = get_file_info(file_path)
 
     db_object.do_insert("""
-    INSERT INTO project_files(file_name, file_content, project_id)
-    VALUES(?,?,?)
-    """, (file_info[0], file_info[1], project_id, ))
+    INSERT INTO project_files(file_name, file_content, project_id, protocol_id)
+    VALUES(?,?,?,?)
+    """, (file_info[0], file_info[1], project_id, protocol_id, ))
 
 
     """ Copy the file to project path and change permissions """
@@ -73,7 +73,7 @@ def get_file_info(file):
     file_name = file.split("/")[-1]
     return [file_name, content]
 
-def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id, protocol_id, parent_method_name, parent_method_serial):
+def run_and_record_process(step_no, step_name, command, tool_name, log_file, project_id, protocol_id, parent_method_name, parent_method_serial, command_method):
     logger.info( "INFO: Attempting to execute [STEP:%s]'%s'" %(step_no, step_name))
 
     try:
@@ -107,12 +107,12 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
 
         # TODO - THIS IS INSECURE VERSION , use ? way instead of %s
-        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at, protocol_id, executed_method_name, executed_method_serial )\
-         VALUES(?,?,?,?,?,?, ?, ?,?, ?, ?)'
+        cmd = 'INSERT INTO project_activity (tool_name, step_no, step_name, command, status, log_file, project_id, created_at, protocol_id, parent_method_name, parent_method_serial, command_method)\
+         VALUES(?,?,?,?,?,?, ?, ?,?, ?, ?, ?)'
 
 
 
-        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), protocol_id, parent_method_name, parent_method_serial))
+        cur = db_object.do_insert(cmd, (tool_name, step_no, step_name, command, "to_run", log_file, project_id, datetime.now(), protocol_id, parent_method_name, parent_method_serial, command_method))
 
         logger.info(log_file)
         fh_stdout = open(log_file, 'wb')
