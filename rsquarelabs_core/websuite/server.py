@@ -342,11 +342,14 @@ def projects_list():
     qs_string = request.query_string
     backup_id = None
     delete_id = None
+    export_id = None
 
     if "backup_id=" in qs_string:
         backup_id = qs_string.split('backup_id=')[1].split('&')[0]
     elif "delete_id=" in qs_string:
         delete_id = qs_string.split('delete_id=')[1].split('&')[0]
+    elif "export_id=" in qs_string:
+        export_id = qs_string.split('export_id=')[1].split('&')[0]
 
     if backup_id != None:
         project_slug = db_object.do_select("SELECT slug from projects where id=?", (backup_id, )).fetchone()[0]
@@ -358,6 +361,62 @@ def projects_list():
         db_object.conn.execute("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
         db_object.conn.commit()
         redirect('/websuite/projects.html')
+    elif export_id !=None:
+        yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s.yaml" % (export_id))
+
+        export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?",
+                                                  (export_id,)).fetchone()
+
+        export_protocol_data = db_object.do_select("select id, name, class_name from protocols where project_id=?",
+                                                   (export_id,)).fetchall()
+
+        protocols_data = {}
+        No_protocols = len(export_protocol_data) + 1
+
+
+        for protocol_order in range(1, No_protocols):
+
+            export_activity_data = db_object.do_select(
+                "select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?",
+                (int(export_protocol_data[protocol_order - 1][0]),)).fetchall()
+            export_file_data = db_object.do_select(
+                "select file_name, file_content from project_files where protocol_id = ? ",
+                (int(export_protocol_data[protocol_order - 1][0]),)).fetchone()
+
+
+            order = 0
+            activity_data = []
+
+            for activity_order in range(1, len(export_activity_data) + 1):
+                if int(export_activity_data[activity_order - 1][1]) == 1:
+                    order += 1
+                    activity_data.append({order: str(export_activity_data[activity_order - 1][0])})
+
+            protocol_data = {
+                protocol_order:
+                    {
+                        "protocol_name": str(export_protocol_data[protocol_order - 1][1]),
+                        "class_name": str(export_protocol_data[protocol_order - 1][2]),
+                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                        "steps": activity_data
+                    }
+
+            }
+
+            protocols_data.update(protocol_data)
+
+        data = {
+            "title": str(export_project_data[0]),
+            "tag": str(export_project_data[1]),
+            "user_email": str(export_project_data[2]),
+            "short_note": str(export_project_data[3]),
+            "protocols": protocols_data
+        }
+
+        with open(yaml_file, 'w') as file_handler:
+            dump(data, file_handler, default_flow_style=False)
+
+        redirect('/websuite/download/export_%s.yaml' % (export_id))
 
     content = open(os.path.join(HTML_DIR, 'projects.html')).read()
 
@@ -394,8 +453,8 @@ def export_yaml(project_id):
         protocols_data = {}
         No_protocols = len(export_protocol_data) + 1
 
-        if file_mode == "recreate":
-            No_protocols = 1
+        # if file_mode == "recreate":
+        #     No_protocols = 1
 
         for protocol_order in range(1, No_protocols):
             # print export_protocol_data[protocol_order][0]
@@ -506,7 +565,7 @@ def import_project():
 def projects_view(project_id):
     now = datetime.now().strftime(footer_timeformat)
 
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id)).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id, )).fetchone()
     #TODO = filter by project_id
     project_activity_data = db_object.do_select(
             "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,))
@@ -514,7 +573,7 @@ def projects_view(project_id):
     protocols_list = db_object.do_select("select id, name from protocols where project_id=?", (project_id, )).fetchall()
 
     if project_data is None:
-        project_log= None
+        project_log = None
         project_config = None
         file_list_filter = None
         project_activity_data = None
@@ -526,6 +585,64 @@ def projects_view(project_id):
         for file in file_list:
             if not file.startswith("#") and not file.endswith("#"):
                 file_list_filter.append(file)
+
+    qs_string = request.query_string
+    protocol_id = None
+
+    #exporting individual protocol
+
+    if "protocol_id=" in qs_string:
+        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
+        print protocol_id
+
+    if protocol_id !=None:
+        yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s_%s.yaml" % (project_id, protocol_id))
+
+        print project_id
+        export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?", (project_id, )).fetchone()
+
+        export_protocol_data = db_object.do_select("select name, class_name from protocols where id=?", (protocol_id, )).fetchone()
+        print export_protocol_data
+
+        export_activity_data = db_object.do_select(
+            "select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?",
+            (protocol_id,)).fetchall()
+        export_file_data = db_object.do_select(
+            "select file_name, file_content from project_files where protocol_id = ? ",
+            (protocol_id,)).fetchone()
+        # print export_file_data
+
+        order = 0
+        activity_data = []
+
+        for activity_order in range(1, len(export_activity_data) + 1):
+            if int(export_activity_data[activity_order - 1][1]) == 1:
+                order += 1
+                activity_data.append({order: str(export_activity_data[activity_order - 1][0])})
+
+        protocol_data = {
+                    "protocol_name": str(export_protocol_data[0]),
+                    "protocol_activity": {
+                        "class_name": str(export_protocol_data[1]),
+                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                        "steps": activity_data
+                    }
+                }
+
+        data = {
+            "title": str(export_project_data[0]),
+            "tag": str(export_project_data[1]),
+            "user_email": str(export_project_data[2]),
+            "short_note": str(export_project_data[3]),
+        }
+
+        data.update(protocol_data)
+
+        with open(yaml_file, 'w') as file_handler:
+            dump(data, file_handler, default_flow_style=False)
+
+        redirect('/websuite/download/export_%s_%s.yaml' % (project_id, protocol_id))
+
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
     return template(content, file_list=file_list_filter, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data,protocols_list=protocols_list, now=now)
 
