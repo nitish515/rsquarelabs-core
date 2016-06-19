@@ -1,24 +1,24 @@
-# rsquarelabs-core
+# framework
 
-[![Build Status](https://travis-ci.org/rsquarelabs/rsquarelabs-core.svg?branch=dev)](https://travis-ci.org/rsquarelabs/rsquarelabs-core)
-[![Requirements Status](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements/?branch=dev)
+[![Build Status](https://travis-ci.org/rsquarelabs/framework.svg?branch=dev)](https://travis-ci.org/rsquarelabs/framework)
+[![Requirements Status](https://requires.io/github/rsquarelabs/framework/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/framework/requirements/?branch=dev)
 
-![rsquarelabs-core hero ](_docs/images/rsquarelabs-hero.jpg)
+![framework hero ](_docs/images/rsquarelabs-hero.jpg)
 
 This is the library of automation pipeline modules
 
 [Website](http://rsquarelabs.org) |
-[Documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki/) |
-[Installation](https://github.com/rsquarelabs/rsquarelabs-core/wiki#installation) |
-[Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
-[Gitter Chat](https://gitter.im/rsquarelabs/rsquarelabs-core)
+[Documentation](https://github.com/rsquarelabs/framework/wiki/) |
+[Installation](https://github.com/rsquarelabs/framework/wiki#installation) |
+[Mailing List](https://groups.google.com/d/forum/framework) |
+[Gitter Chat](https://gitter.im/rsquarelabs/framework)
 
 
 ## Summary
 - [**Install**](#install)
 - [**Features**](#features)
 - [**Usage**](#usage)
-- [**Why rsquarelabs-core?**](#why-rsquarelabs-core)
+- [**Why framework?**](#why-framework)
 - [**Community**](#community)
 - [**Roadmap**](#roadmap)
 - [**Support**](#support)
@@ -27,7 +27,7 @@ This is the library of automation pipeline modules
 
 ## Install
 ```
-pip install rsquarelabs-core
+pip install framework
 ```
 **we currently support python 2.7 only**
 
@@ -62,7 +62,7 @@ obj.minimize()
 1. Start a light weight webserver
 2. commands for /usr/local/bin/
 
-## Why rsquarelabs-core
+## Why framework
 1. scaffolding the project
 2. project management
 3. Tracking the project via webclient
@@ -73,17 +73,17 @@ Want to join an open source project? Now it's your chance!
 
 Don't know what you want to help out with? Well here are some areas that we could use help with:
 
-- rsquarelabs-core scientific thoughts,
-- rsquarelabs-core [technical stack](_docs/notes/technical-stack.md)
-- rsquarelabs-core code - see [milestones](https://github.com/rsquarelabs/rsquarelabs-core/milestones) and [issues](https://github.com/rsquarelabs/rsquarelabs-core/issues) for more
-- rsquarelabs-core [documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki), [tutorials](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Tutorials) and [examples](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Examples)
-- rsquarelabs-core [website](http://rsquarelabs.org)
+- framework scientific thoughts,
+- framework [technical stack](_docs/notes/technical-stack.md)
+- framework code - see [milestones](https://github.com/rsquarelabs/framework/milestones) and [issues](https://github.com/rsquarelabs/framework/issues) for more
+- framework [documentation](https://github.com/rsquarelabs/framework/wiki), [tutorials](https://github.com/rsquarelabs/framework/wiki/Tutorials) and [examples](https://github.com/rsquarelabs/framework/wiki/Examples)
+- framework [website](http://rsquarelabs.org)
 - If you want to join our community as a contributor, please leave a message as [@rrmerugu](https://twitter.com/rrmerugu)
 
 
 
 ## RoadMap
-You can find a detailed Roadmap of rsquarelabs-core [here](https://github.com/rsquarelabs/rsquarelabs-core/milestones).
+You can find a detailed Roadmap of framework [here](https://github.com/rsquarelabs/framework/milestones).
 
 ## Support
 We support universties and research labs to install, configure and setup rl-core
