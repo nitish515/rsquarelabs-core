@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>RMV | RSQUARE LABS Automator </title>
+</head>
+<body>
+% include('header.html')
+<div class="container pageview">
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Run Files :</h4>
+            <ol>
+                %for file in file_list:
+                    <li><a href="/websuite/runs/{{run_id}}?download_file={{file}}">{{file}}</a> </li>
+                %end
+            </ol>
+        </div>
+        <div class="col-md-8">
+            <h4>Run Activity <small><a href="/websuite/runs/{{run_id}}/activity">see all</a></small>  </h4>
+            <ul>
+                % for activity in run_activity_data:
+                <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}, <strong>PID:</strong> {{activity[5]}}
+                    <br>
+                    <pre>{{activity[4]}}</pre></li>
+                % end
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <form role="form" method="post">
+                <label for="notes">Notes :</label>
+                <textarea class="form-control" rows="10" name="run_notes" id="notes"></textarea>
+                <button type="submit" class="btn btn-success btn-lg"><strong>Submit</strong></button>
+            </form>
+        </div>
+    </div>
+</div>
+% include('footer.html', now=now)
+</body>
+</html>

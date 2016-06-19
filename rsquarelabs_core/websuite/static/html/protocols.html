@@ -20,29 +20,32 @@
                     <tr>
                         <th>Protocol ID</th>
                         <th>Protocol name</th>
-                        <th>Protocol version</th>
-                        <th>Parent Protocol</th>
-                        <th>Master Protocol</th>
-                        <th>Protocol data</th>
-                        <th>Actions</th>
+                        <th>Author</th>
+                        <!--<th>Protocol version</th>-->
+                        <!--<th>Parent Protocol</th>-->
+                        <!--<th>Master Protocol</th>-->
+                        <!--<th>Protocol data</th>-->
+                        <th>Protocol class</th>
+                        <th>Protocol description</th>
+                        <th>Date</th>
+
+                        <!--<th>Actions</th>-->
                     </tr>
                 </thead>
                 <tbody>
                     %for protocol in protocol_list:
-                        %if protocol[6] == 0:
                             <tr>
-                                <td>{{protocol[0]}}</td>
+                                <td><a href="/websuite/protocol/{{protocol[0]}}">{{protocol[0]}}</a></td>
                                 <td>{{protocol[1]}}</td>
                                 <td>{{protocol[2]}}</td>
                                 <td>{{protocol[3]}}</td>
                                 <td>{{protocol[4]}}</td>
                                 <td>{{protocol[5]}}</td>
-                                <td><a href="/websuite/automator.html?pro_id={{protocol[0]}}" class=" btn btn-default">Import</a>
-                                    <a href="/websuite/protocols.html?protocol_id={{protocol[0]}}" class="btn btn-danger" role="button">Delete</a>
-                                    <a href="/websuite/automator_run.html?protocol_id={{protocol[0]}}" class="btn btn-success" role="button">Execute</a>
+                                <td><a href="/websuite/automator.html?master_id={{protocol[0]}}" class=" btn btn-default">Fork</a>
+                                    <!--<a href="/websuite/protocols.html?protocol_id={{protocol[0]}}" class="btn btn-danger" role="button">Delete</a>-->
+                                    <!--<a href="/websuite/automator_run.html?protocol_id={{protocol[0]}}" class="btn btn-success" role="button">Execute</a>-->
                                 </td>
                             </tr>
-                        %end
                     %end
                 </tbody>
             </table>

@@ -50,7 +50,7 @@
             <div class="col-md-12">
                 <h4>Project Activity</h4>
                  <ul>
-                % for activity in project_activity_data:
+                % for activity in run_activity_data:
                     <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong>{{activity[2]}}, <strong>StepName:</strong>{{activity[3]}}, <strong>PID:</strong>{{activity[5]}} <pre>{{activity[4]}}</pre></li>
                 % end
                 </ul>

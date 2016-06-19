@@ -26,90 +26,88 @@
             <div class="col-md-3">
 
                 <ul class="list-group">
-                  <li class="list-group-item">
-                      <span class="badge">{{all_projects_count}}</span>
-                    <a href="/websuite/projects.html">Projects</a>
-                  </li>
-                     <li class="list-group-item">
-                     <span class="badge">{{len(all_projects_activity)}}</span>
-                    Project Activities Count
-                  </li>
                     <li class="list-group-item">
-                    <span class="badge">{{all_running_activity_count}}</span>
-                    Running Tasks
-                  </li>
-                         <li class="list-group-item">
-                    <span class="badge">0</span>
-                    Knowledge Contributed
-                  </li>
+                        <span class="badge">{{all_projects_count}}</span>
+                        <a href="/websuite/projects.html">Projects</a>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{len(all_projects_activity)}}</span>
+                        Project Activities Count
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{all_running_activity_count}}</span>
+                        Running Tasks
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">0</span>
+                        Knowledge Contributed
+                    </li>
                 </ul>
 
 
                 <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Running Tasks <span class="badge">{{all_running_activity_count}}</span>  </h3>
-                  </div>
-                  <div class="panel-body">
-                    <ul class="list-unstyled">
-                        %for activity in running_activity:
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Running Tasks <span class="badge">{{all_running_activity_count}}</span>  </h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-unstyled">
+                            %for activity in running_activity:
                             <li><strong>Activity id:</strong>{{activity[0]}}</li>
                             <li><strong>Project id:</strong>{{activity[2]}}</li>
                             <li><strong>Step name:</strong>{{activity[1]}}</li>
-                        %end
-                    </ul>
-                  </div>
+                            %end
+                        </ul>
+                    </div>
                 </div>
                 <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Recent Projects </h3>
-                  </div>
-                  <div class="panel-body">
-                      <ul class="list-unstyled">
-                      % for project in recent_projects:
-                        <li><a href="/websuite/project/{{project[0]}}">{{project[1]}}</a></li>
-                      % end
-                   </ul>
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Recent Projects </h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-unstyled">
+                            % for project in recent_projects:
+                            <li><a href="/websuite/project/{{project[0]}}">{{project[1]}}</a></li>
+                            % end
+                        </ul>
 
-                  </div>
+                    </div>
                 </div>
 
-               <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Recent Protocols </h3>
-                  </div>
-                  <div class="panel-body">
-                    <ul class="list-unstyled">
-                      % for protocol in recent_protocols:
-                        <li><a href="/websuite/protocol/{{protocol[0]}}">{{protocol[1]}}</a></li>
-                      % end
-                  </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Recent Runs </h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-unstyled">
+                            % for run in recent_runs:
+                            <li>{{run[1]}}</li>
+                            % end
+                        </ul>
+                    </div>
                 </div>
-
-
             </div>
+
             <div class="col-md-9">
                 <!--<h2>Something comes here</h2>-->
                   <div class="panel panel-default">
-                  <div class="panel-heading">
-                    <h3 class="panel-title">Overall Commands Activity </h3>
+                      <div class="panel-heading">
+                          <h3 class="panel-title">Overall Commands Activity </h3>
 
 
 
+                      </div>
+                      <div class="panel-body">
+                          <ul class="list-unstyled">
+
+                              % for activity in all_projects_activity:
+                              <li><strong>Activity Id:</strong> {{activity[0]}}. <strong>Project Id:</strong> <a href="/websuite/project/{{activity[6]}}">{{activity[6]}}</a>, <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}
+                                  <br>
+                                  <!--<pre>{{activity[4]}}</pre>-->
+                              </li>
+                              % end
+                          </ul>
+                      </div>
                   </div>
-                  <div class="panel-body">
-                   <ul class="list-unstyled">
-
-                    % for activity in all_projects_activity:
-                        <li><strong>Activity Id:</strong> {{activity[0]}}. <strong>Project Id:</strong> <a href="/websuite/project/{{activity[6]}}">{{activity[6]}}</a>, <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}
-                        <br>
-                        <!--<pre>{{activity[4]}}</pre>-->
-                        </li>
-                    % end
-                    </ul>
-                  </div>
-                </div>
-
-
             </div>
         </div>
     </div>

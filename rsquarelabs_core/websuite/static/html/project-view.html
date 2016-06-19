@@ -55,45 +55,41 @@
         <div class="container">
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-7">
                 <h4>Protocols: </h4>
 
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Protocol ID</th>
-                            <th>Protocol name</th>
+                            <th>Run ID</th>
+                            <th>Run name</th>
+                            <th>Version</th>
+                            <th>Class name</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                    %for protocol in protocols_list:
+                    %for run in runs_list:
                         <tr>
-
-                                <td>{{protocol[0]}}</td>
-                                <td>{{protocol[1]}}</td>
-                                <td><a href="/websuite/project/{{project_data[0]}}?protocol_id={{protocol[0]}}" class=" btn btn-primary">Export</a></td>
-
+                            <td><a href="/websuite/runs/{{run[0]}}">{{run[0]}}</a></td>
+                            <td>{{run[1]}}</td>
+                            <td>{{run[2]}}</td>
+                            <td>{{run[3]}}</td>
+                            <td><a href="/websuite/project/{{project_data[0]}}?run_id={{run[0]}}" class=" btn btn-primary">Export</a>
+                                <a href="/websuite/automator.html?run_id={{run[0]}}" class=" btn btn-default">Import</a>
+                            </td>
                         </tr>
                     %end
                     </tbody>
                 </table>
-
-
-
             </div>
-            <div class="col-md-8">{{ project_activity_data}}
-                <h4>Project Activity <small><a href="/websuite/project/{{project_data[0]}}/activity">see all</a></small>  </h4>
-                 <ul>
-                % for activity in project_activity_data:
-                    <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}, <strong>PID:</strong> {{activity[5]}}
-                        <br>
-                        <pre>{{activity[4]}}</pre></li>
-                % end
-                </ul>
+            <div class="col-md-5">
+                 % for note in run_notes_list :
+                    {{note[0]}}. {{note[1]}}
+                <hr>
 
+                 % end
             </div>
-
         </div>
 
 

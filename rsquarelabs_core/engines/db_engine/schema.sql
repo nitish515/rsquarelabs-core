@@ -24,7 +24,7 @@ CREATE TABLE project_activity
     created_at TEXT,
     updated_at TEXT,
     pid_status TEXT,
-    protocol_id INT NOT NULL,
+    run_id INT NOT NULL,
     parent_method_name TEXT NOT NULL,
     parent_method_serial INT NOT NULL,
     command_method TEXT NOT NULL);
@@ -35,17 +35,29 @@ CREATE TABLE project_files
     project_id INTEGER NOT NULL,
     created_at TEXT,
     updated_at TEXT,
-    protocol_id INT NOT NULL);
-CREATE TABLE protocols
-    (id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    run_id INT NOT NULL);
+CREATE TABLE runs
+    (run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_name TEXT NOT NULL,
     version INT,
-    parent_protocol INT,
-    master_protocol INT,
-    protocol_data TEXT NOT NULL,
+    parent_run_id INT,
+    master_id INT,
+    run_data TEXT NOT NULL,
     is_delete INT,
     python_file TEXT,
     log_file TEXT,
     w_dir TEXT,
     project_id INT NOT NULL,
-    class_name TEXT NOT NULL)
+    class_name TEXT NOT NULL);
+CREATE TABLE protocols
+    (protocol_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    protocol_name TEXT,
+    class TEXT,
+    protocol_data TEXT,
+    description TEXT,
+    author TEXT,
+    date TEXT);
+CREATE TABLE notes
+    (note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    note TEXT,
+    run_id INT NOT NULL)

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+
+    <title>RMV | RSQUARE LABS Automator </title>
+</head>
+<body>
+% include('header.html')
+
+<div class="container pageview">
+    <form role="form">
+        <div class="form group">
+            <label for="commands"> Commands: </label>
+            <textarea class="form-control" rows="15" name="protocol_data" id="commands">{{protocol_data}}</textarea>
+        </div>
+    </form>
+</div>
+
+
+% include('footer.html', now=now)
+</body>
+</html>
