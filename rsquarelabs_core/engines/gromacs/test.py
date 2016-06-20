@@ -1,3 +1,9 @@
+import sys, os
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+CORE_DIR = os.path.join(THIS_DIR, '../../../')
+sys.path.append(CORE_DIR)
+
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH,\
     RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH, RSQ_HOME, RSQ_LOG_PATH
 from rsquarelabs_core.engines.projects import Project
