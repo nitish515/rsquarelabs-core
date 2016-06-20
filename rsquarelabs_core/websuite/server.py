@@ -17,7 +17,8 @@ JS_DIR      = os.path.join(STATIC_DIR, 'js')
 
 from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
-from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
+from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH,\
+    RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
 
 
 
@@ -55,7 +56,7 @@ obj = CLASS_NAME(
  working_dir = "WORKING_DIR",
  receptor_file = "RECEPTOR_FILE",
  log_file = "RSQ_DB_LOG",
- protocol_id = "PROTOCOL_ID"
+ run_id = "RUN_ID"
 )
 
 
@@ -99,29 +100,40 @@ def error404(error):
 
 @app.route('/websuite/automator.html')
 def automator():
+    """
+    This provides to execute the runs through server.
+
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
     qs_string = request.query_string
     # pro_ver = 1
-    pro_id = None
+    run_id = None
+    master_id = None
     protocol_initial_data = None
     project_recreate_data = None
 
-    if "pro_id=" in qs_string:
-        pro_id = qs_string.split('pro_id=')[1].split('&')[0]
+    if "run_id=" in qs_string:
+        run_id = qs_string.split('run_id=')[1].split('&')[0]
+    if "master_id=" in qs_string:
+        master_id = qs_string.split('master_id=')[1].split('&')[0]
 
 
-    if pro_id:
-        protocol_initial_data = db_object.do_select("SELECT id, name, version, parent_protocol, master_protocol, protocol_data from protocols WHERE id =?",
-                                                    (pro_id,)).fetchone()
-    new_version = db_object.do_select("SELECT MAX(version) from protocols WHERE parent_protocol=?", (pro_id, )).fetchone()[0]
+    if run_id:
+        protocol_initial_data = db_object.do_select("SELECT run_name, run_data, parent_run_id from runs WHERE run_id =?",
+                                                    (run_id,)).fetchone()
+    elif master_id:
+        protocol_initial_data = db_object.do_select("SELECT protocol_name, protocol_data from protocols WHERE protocol_id =?",
+                                                    (master_id,)).fetchone()
+    new_version = db_object.do_select("SELECT MAX(version) from runs WHERE parent_run_id=?", (run_id, )).fetchone()[0]
     print new_version
     print type(new_version)
 
     if new_version != None:
         new_version = int(new_version) + 1
     else:
-        if pro_id != None:
-            if protocol_initial_data[3] == 0:
+        if run_id != None:
+            if protocol_initial_data[2] == 0:
                 new_version = 2
             else:
                 new_version = 1
@@ -159,28 +171,33 @@ def automator():
 
 @app.route('/websuite/automator.html', method='POST')
 def automator_insert():
+    """
+    This insert run data into runs table through automator feature.
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
-    name = request.forms.get("name")
+    run_name = request.forms.get("run_name")
     version = request.forms.get("version")
-    protocol_data = request.forms.get("protocol_data")
+    run_data = request.forms.get("run_data")
     project_id = request.forms.get("project_id")
     protocol_class_name = request.forms.get("protocol_class")
     receptor_file = request.forms.get("receptor_file")
 
     qs_string = request.query_string
-    pro_id = None
-    master_protocol = 0
-    parent_protocol = 0
+    run_id = None
+    master_id = 0
+    parent_run_id = 0
 
-    if "pro_id=" in qs_string:
-        pro_id = qs_string.split('pro_id=')[1].split('&')[0]
+    if "run_id=" in qs_string:
+        run_id = qs_string.split('run_id=')[1].split('&')[0]
 
-        master_protocol = db_object.do_select("SELECT master_protocol from protocols WHERE id=?", (pro_id,)).fetchone()[0]
-        parent_protocol = pro_id
+        master_id = db_object.do_select("SELECT master_id from runs WHERE run_id=?", (run_id,)).fetchone()[0]
+        parent_run_id = run_id
 
-        if master_protocol == 0:
-            master_protocol = pro_id
+        if master_id == 0:
+            master_id = run_id
 
+    
     # if "project_id=" in qs_string:
     #     project_id = qs_string.split('project_id=')[1].split('&')[0]
 
@@ -189,83 +206,85 @@ def automator_insert():
     # protocol_data = re.escape(protocol_data)
 
 
-    db_object.do_insert(" INSERT INTO protocols (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id, class_name)\
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (name, version, parent_protocol, master_protocol, protocol_data, is_delete, project_id, protocol_class_name, ))
+    db_object.do_insert(" INSERT INTO runs (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, class_name)\
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, protocol_class_name, ))
 
-    protocol_id = db_object.cur.lastrowid
+    run_id = db_object.cur.lastrowid
 
     project_path = db_object.do_select("select path from projects where id=?", (project_id,)).fetchone()[0]
-    working_dir = os.path.join(project_path, "%s_%s" % (protocol_id, version))
+    working_dir = os.path.join(project_path, "%s_%s" % (run_id, version))
     os.mkdir(working_dir, 0755)
 
-    db_object.conn.execute("UPDATE protocols SET w_dir = ? WHERE id =?",
-                           (working_dir, protocol_id,))
+    db_object.conn.execute("UPDATE runs SET w_dir = ? WHERE run_id =?",
+                           (working_dir, run_id,))
     db_object.conn.commit()
 
-    file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s" % (protocol_id, version, time()))
+    file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s" % (run_id, version, time()))
     py_file_name = "%s.py" %file_name
     log_file_name = "%s.log" % file_name
 
-    db_object.conn.execute("UPDATE protocols SET python_file = ?, log_file = ? WHERE id =?", (py_file_name, log_file_name, protocol_id, ))
+    db_object.conn.execute("UPDATE runs SET python_file = ?, log_file = ? WHERE run_id =?", (py_file_name, log_file_name, run_id, ))
     db_object.conn.commit()
 
-    protocol_header = execute_template.replace('RSQ_DB_LOG', log_file_name).replace('CLASS_NAME', protocol_class_name).\
+    run_header = execute_template.replace('RSQ_DB_LOG', log_file_name).replace('CLASS_NAME', protocol_class_name).\
         replace('WORKING_DIR', working_dir).replace('PROJECT_ID', project_id).replace('RECEPTOR_FILE', receptor_file).\
-        replace('PROTOCOL_ID', str(protocol_id))
+        replace('RUN_ID', str(run_id))
 
+    run_data_new = ""
 
-    protocol_data_new = ""
-
-    for line in protocol_data.split("\n"):
+    for line in run_data.split("\n"):
         line = line.rstrip().lstrip()
 
         if line and line.endswith(")"):
+            run_data_new = run_data_new + "\nobj." + line
 
-            protocol_data_new = protocol_data_new + "\nobj." + line
-
-    protocol_data = protocol_header + protocol_data_new
+    run_data = run_header + run_data_new
 
 
     fh = open(py_file_name, 'w')
-    fh.write(protocol_data)
+    fh.write(run_data)
 
     #TODO - find better approach for %s
-    redirect('/websuite/automator_run.html?protocol_id=%s&start=true' % (protocol_id))
+    redirect('/websuite/automator_run.html?run_id=%s&start=true' % (run_id))
 
 
 @app.route('/websuite/automator_run.html')
 def automator_run():
+    """
+    This shows the simulation results during runs.
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
 
     qs_string = request.query_string
-    protocol_id = None
+    run_id = None
 
 
 
-    if "protocol_id=" in qs_string:
-        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
+    if "run_id=" in qs_string:
+        run_id = qs_string.split('run_id=')[1].split('&')[0]
 
     if "start=" in qs_string:
         start = qs_string.split('start=')[1].split('&')[0]
 
 
 
-    executed_protocol = db_object.do_select(
-        "SELECT python_file, log_file from protocols where id=?", (protocol_id, )).fetchone()
+    executed_run = db_object.do_select(
+        "SELECT python_file, log_file from runs where run_id=?", (run_id, )).fetchone()
     if start == "true":
-        subprocess.Popen(['python', executed_protocol[0]], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-        redirect('/websuite/automator_run.html?protocol_id=%s&start=false' % (protocol_id))
+        subprocess.Popen(['python', executed_run[0]], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        redirect('/websuite/automator_run.html?run_id=%s&start=false' % (run_id))
     elif start == "false":
         from time import sleep
         sleep(2)
 
-        if os.path.isfile(executed_protocol[1]):
-            fh = open(executed_protocol[1], 'r')
+        if os.path.isfile(executed_run[1]):
+            fh = open(executed_run[1], 'r')
             executed_data = fh.read()
         else:
             executed_data = ""
 
-    running_activity = db_object.do_select("select id from project_activity where protocol_id=? and pid_status=?", (protocol_id,"running", )).fetchall()
+    running_activity = db_object.do_select("select id from project_activity where run_id=? and pid_status=?", (run_id,"running", )).fetchall()
 
 
     if len(running_activity) > 0:
@@ -279,23 +298,72 @@ def automator_run():
 
 @app.route('/websuite/protocols.html')
 def protocols():
+    """
+    This feature shows the protocols detail in a table.
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
 
-    qs_string = request.query_string
-    protocol_id = None
+    # qs_string = request.query_string
+    # protocol_id = None
+    #
+    # if "protocol_id=" in qs_string:
+    #     protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
+    #
+    #
+    # if protocol_id != None:
+    #     db_object.conn.execute("UPDATE runs SET is_delete = 1 WHERE id= ?", (protocol_id,))
+    #     db_object.conn.commit()
 
-    if "protocol_id=" in qs_string:
-        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
-
-
-    if protocol_id != None:
-        db_object.conn.execute("UPDATE protocols SET is_delete = 1 WHERE id= ?", (protocol_id,))
-        db_object.conn.commit()
-
-    protocol_list = db_object.do_select("SELECT id, name, version, parent_protocol , master_protocol, protocol_data, is_delete from protocols", ())
+    protocol_list = db_object.do_select("select protocol_id, protocol_name, author, class, description, date from protocols", ()).fetchall()
 
     content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
     return template(content,protocol_list=protocol_list,now=now)
+
+
+@app.route('/websuite/protocols/new.html')
+def protocols_new():
+    """
+    This shows the forum to insert a protocol.
+    :return:
+    """
+    now = datetime.now().strftime(footer_timeformat)
+
+    content = open(os.path.join(HTML_DIR, 'new.html')).read()
+    return template(content, now=now)
+
+
+@app.route('/websuite/protocols/new.html', method='POST')
+def protocols_new():
+    """
+    This insert the new protocol into protocols table.
+    :return:
+    """
+    now = datetime.now().strftime(footer_timeformat)
+
+    name = request.forms.get('name')
+    author = request.forms.get('author')
+    description = request.forms.get('description')
+    data = request.forms.get('protocol_data')
+
+    db_object.do_insert("insert into protocols (protocol_name, class, protocol_data, description, author, date)\
+     values (?, ?, ?, ?, ?, ?)", (name, "ProteinMin", data, description, author, datetime.now().strftime("%Y-%m-%d %H:%M"), ))
+
+    redirect('/websuite/protocols/new.html')
+
+@app.route('/websuite/protocol/:protocol_id')
+def protocol_view(protocol_id):
+    """
+    This shows the protocol data of a protocol using its protocol_id
+    :param protocol_id: identification number of a protocol
+    :return:
+    """
+    now = datetime.now().strftime(footer_timeformat)
+
+    protocol_data = db_object.do_select("select protocol_data from protocols where protocol_id=?", (protocol_id)).fetchone()[0]
+
+    content = open(os.path.join(HTML_DIR, 'protocol-view.html')).read()
+    return template(content, protocol_data=protocol_data, now=now)
 
 
 @app.route('/index')
@@ -303,12 +371,20 @@ def protocols():
 @app.route('/')
 @app.route('/websuite')
 def goto_index():
+    """
+    This redirect to index page
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
     redirect('/websuite/index.html')
 
 
 @app.route('/websuite/index.html')
 def index():
+    """
+    This provides the whole status of all projects and runs of a user.
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
 
     # TODO - optimise this query - the query is to get the total number of not deleted projects
@@ -318,8 +394,9 @@ def index():
 
     all_projects_count = len(all_projects)
     recent_projects = all_projects[:2]
-    recent_protocols = db_object.do_select(
-            "select id, name, version from protocols where is_delete=0 ORDER BY id DESC ",()).fetchall()[:2]
+
+    recent_runs = db_object.do_select(
+            "select run_id, run_name, version from runs where is_delete=0 ORDER BY run_id DESC ",()).fetchall()[:2]
 
     running_activity = db_object.do_select("select  id, step_name, project_id  from project_activity where pid_status=?", ("running", )).fetchall()
     all_running_activity_count = len(running_activity)
@@ -328,7 +405,7 @@ def index():
     return template(content, all_projects_activity=all_projects_activity,
                     all_projects_count=all_projects_count,
                     recent_projects=recent_projects,
-                    recent_protocols=recent_protocols,
+                    recent_runs=recent_runs,
                     running_activity=running_activity,
                     all_running_activity_count=all_running_activity_count,
                     now=now)
@@ -336,8 +413,13 @@ def index():
 
 @app.route('/websuite/projects.html')
 def projects_list():
+    """
+    This provides the list of projects with options of delete, back up and export to others.
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
     projects_data = db_object.do_select("SELECT id, slug, title, tags, user_email, type, path, log, date, is_delete from projects where is_delete = 0", ())
+
 
     qs_string = request.query_string
     backup_id = None
@@ -367,21 +449,21 @@ def projects_list():
         export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?",
                                                   (export_id,)).fetchone()
 
-        export_protocol_data = db_object.do_select("select id, name, class_name from protocols where project_id=?",
+        export_run_data = db_object.do_select("select run_id, run_name, class_name from runs where project_id=?",
                                                    (export_id,)).fetchall()
 
-        protocols_data = {}
-        No_protocols = len(export_protocol_data) + 1
+        runs_data = {}
+        No_runs = len(export_run_data) + 1
 
 
-        for protocol_order in range(1, No_protocols):
+        for run_order in range(1, No_runs):
 
             export_activity_data = db_object.do_select(
-                "select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?",
-                (int(export_protocol_data[protocol_order - 1][0]),)).fetchall()
+                "select parent_method_name, parent_method_serial, command_method from project_activity where run_id=?",
+                (int(export_run_data[run_order - 1][0]),)).fetchall()
             export_file_data = db_object.do_select(
-                "select file_name, file_content from project_files where protocol_id = ? ",
-                (int(export_protocol_data[protocol_order - 1][0]),)).fetchone()
+                "select file_name, file_content from project_files where run_id = ? ",
+                (int(export_run_data[run_order - 1][0]),)).fetchone()
 
 
             order = 0
@@ -392,25 +474,25 @@ def projects_list():
                     order += 1
                     activity_data.append({order: str(export_activity_data[activity_order - 1][0])})
 
-            protocol_data = {
-                protocol_order:
-                    {
-                        "protocol_name": str(export_protocol_data[protocol_order - 1][1]),
-                        "class_name": str(export_protocol_data[protocol_order - 1][2]),
-                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
-                        "steps": activity_data
-                    }
+            run_data = {
+                run_order:
+            {
+                "run_name": str(export_run_data[run_order - 1][1]),
+                "class_name": str(export_run_data[run_order - 1][2]),
+                "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                "steps": activity_data
+            }
 
             }
 
-            protocols_data.update(protocol_data)
+            runs_data.update(run_data)
 
         data = {
             "title": str(export_project_data[0]),
             "tag": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
-            "protocols": protocols_data
+            "runs": runs_data
         }
 
         with open(yaml_file, 'w') as file_handler:
@@ -433,12 +515,7 @@ def export(project_id):
 @app.route('/websuite/export.html/:project_id', method='POST')
 def export_yaml(project_id):
     now = datetime.now().strftime(footer_timeformat)
-    # qs_string = request.query_string
-    #
-    # if "project_id=" in qs_string:
-    #     project_id = qs_string.split('project_id=')[1].split('&')[0]
-    #
-    # if project_id != None:
+
     file_mode = request.forms.get('export')
     # print file_mode
     if file_mode:
@@ -448,20 +525,20 @@ def export_yaml(project_id):
         export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?", (project_id, )).fetchone()
         # export_file_data = db_object.do_select("select  file_name, file_content  from project_files where project_id=? ORDER BY id DESC", (project_id, )).fetchone()
 
-        export_protocol_data = db_object.do_select("select id, name, class_name from protocols where project_id=?", (project_id, )).fetchall()
+        export_run_data = db_object.do_select("select run_id, run_name, class_name from runs where project_id=?", (project_id, )).fetchall()
 
-        protocols_data = {}
-        No_protocols = len(export_protocol_data) + 1
+        runs_data = {}
+        No_runs = len(export_run_data) + 1
 
         # if file_mode == "recreate":
         #     No_protocols = 1
 
-        for protocol_order in range(1, No_protocols):
+        for run_order in range(1, No_runs):
             # print export_protocol_data[protocol_order][0]
-            export_activity_data = db_object.do_select("select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?", (int(export_protocol_data[protocol_order-1][0]), )).fetchall()
+            export_activity_data = db_object.do_select("select parent_method_name, parent_method_serial, command_method from project_activity where run_id=?", (int(export_run_data[run_order-1][0]), )).fetchall()
             export_file_data = db_object.do_select(
-                "select file_name, file_content from project_files where protocol_id = ? ",
-                (int(export_protocol_data[protocol_order-1][0]), )).fetchone()
+                "select file_name, file_content from project_files where run_id = ? ",
+                (int(export_run_data[run_order-1][0]), )).fetchone()
             # print export_file_data
 
             order = 0
@@ -472,55 +549,26 @@ def export_yaml(project_id):
                     order += 1
                     activity_data.append({order: str(export_activity_data[activity_order-1][0])})
 
-            protocol_data = {
-                protocol_order:
-                    {
-                        "protocol_name": str(export_protocol_data[protocol_order-1][1]),
-                        "class_name": str(export_protocol_data[protocol_order-1][2]),
-                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
-                        "steps": activity_data
-                    }
+            run_data = {
+                run_order:
+            {
+                "run_name": str(export_run_data[run_order-1][1]),
+                "class_name": str(export_run_data[run_order-1][2]),
+                "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                "steps": activity_data
+            }
 
             }
 
-            protocols_data.update(protocol_data)
-
-
-
-        # if file_mode == "everything":
-        #     export_steps_data = db_object.do_select("select step_no, step_name, command from project_activity where project_id=?", (project_id, )).fetchall()
-        # elif file_mode == "recreate":
-        #     max_step = db_object.do_select("select MAX(step_no) from project_activity where project_id=?", (project_id, )).fetchone()[0]
-        #     # print int(max_step)+1
-        #     for step_no in range(1, int(max_step)+1):
-        #         step_data = db_object.do_select("SELECT step_no, step_name, command from project_activity WHERE pid_status=? and step_no=? and \
-        #                 project_id=? ORDER BY id DESC", ("done", step_no, project_id,)).fetchone()
-        #         export_steps_data.append(step_data)
-        #     # print export_steps_data
+            runs_data.update(run_data)
 
         data = {
             "title": str(export_project_data[0]),
             "tag": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
-            "protocols": protocols_data
+            "runs": runs_data
         }
-
-        # file_data = {
-        #     "files": {
-        #         str(export_file_data[0]): str(export_file_data[1])
-        #     }
-        # }
-
-        # data.update(file_data)
-
-        # steps_data = {
-        #         "steps":  []
-        #     }
-        # for step in export_steps_data:
-        #     steps_data['steps'].append({int(step[0]): {str(step[1]): str(step[2])}})
-        #
-        # data.update(steps_data)
 
         with open(yaml_file, 'w') as file_handler:
             dump(data, file_handler, default_flow_style=False)
@@ -530,6 +578,11 @@ def export_yaml(project_id):
 
 @app.route('/websuite/download/<filename:path>')
 def download(filename):
+    """
+    This permits to download the given filename in the root path.
+    :param filename: filename to be download
+    :return:
+    """
     return static_file(filename, root='%s'% (RSQ_EXPORT_PATH), download=filename)
 
 @app.route('/websuite/import.html')
@@ -563,53 +616,64 @@ def import_project():
 
 @app.route('/websuite/project/:project_id')
 def projects_view(project_id):
+    """
+    This provides a whole view of a project using its identification number along with notes. Shows the list of runs on a project
+    with export and import features.
+    :param project_id: identification number of a project
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
 
     project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id, )).fetchone()
     #TODO = filter by project_id
     project_activity_data = db_object.do_select(
-            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,))
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,)).fetchall()
 
-    protocols_list = db_object.do_select("select id, name from protocols where project_id=?", (project_id, )).fetchall()
+    runs_list = db_object.do_select("select run_id, run_name, version, class_name from runs where project_id=?", (project_id, )).fetchall()
+
+    run_notes_list = db_object.do_select("select run_id, note from notes", ()).fetchall()
+    # run_notes = ''
+    # for note in run_notes_list:
+    #     run_notes = run_notes + '--->' + str(note[1]) + '\n'
 
     if project_data is None:
         project_log = None
         project_config = None
-        file_list_filter = None
+        # file_list_filter = None
         project_activity_data = None
     else:
         project_log = open(project_data[8], 'r').read()
         project_config = open(project_data[9], 'r').read()
-        file_list = os.listdir(project_data[7])
-        file_list_filter = []
-        for file in file_list:
-            if not file.startswith("#") and not file.endswith("#"):
-                file_list_filter.append(file)
+        # file_list = os.listdir(project_data[7])
+        # file_list_filter = []
+        # for file in file_list:
+        #     if not file.startswith("#") and not file.endswith("#"):
+        #         file_list_filter.append(file)
 
     qs_string = request.query_string
-    protocol_id = None
+    run_id = None
 
     #exporting individual protocol
 
-    if "protocol_id=" in qs_string:
-        protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
-        print protocol_id
+    if "run_id=" in qs_string:
+        run_id = qs_string.split('run_id=')[1].split('&')[0]
+        print run_id
 
-    if protocol_id !=None:
-        yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s_%s.yaml" % (project_id, protocol_id))
+    if run_id !=None:
+        yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s_%s.yaml" % (project_id, run_id))
 
         print project_id
         export_project_data = db_object.do_select("select title, tags, user_email, short_note from projects where id=?", (project_id, )).fetchone()
 
-        export_protocol_data = db_object.do_select("select name, class_name from protocols where id=?", (protocol_id, )).fetchone()
-        print export_protocol_data
+        export_run_data = db_object.do_select("select run_name, class_name from runs where run_id=?", (run_id, )).fetchone()
+        print export_run_data
 
         export_activity_data = db_object.do_select(
-            "select parent_method_name, parent_method_serial, command_method from project_activity where protocol_id=?",
-            (protocol_id,)).fetchall()
+            "select parent_method_name, parent_method_serial, command_method from project_activity where run_id=?",
+            (run_id,)).fetchall()
         export_file_data = db_object.do_select(
-            "select file_name, file_content from project_files where protocol_id = ? ",
-            (protocol_id,)).fetchone()
+            "select file_name, file_content from project_files where run_id = ? ",
+            (run_id,)).fetchone()
         # print export_file_data
 
         order = 0
@@ -620,14 +684,16 @@ def projects_view(project_id):
                 order += 1
                 activity_data.append({order: str(export_activity_data[activity_order - 1][0])})
 
-        protocol_data = {
-                    "protocol_name": str(export_protocol_data[0]),
-                    "protocol_activity": {
-                        "class_name": str(export_protocol_data[1]),
-                        "files": [{str(export_file_data[0]): str(export_file_data[1])}],
-                        "steps": activity_data
-                    }
-                }
+
+
+        run_data = {
+            "run_name": str(export_run_data[0]),
+            "run_activity": {
+                "class_name": str(export_run_data[1]),
+                "files": [{str(export_file_data[0]): str(export_file_data[1])}],
+                "steps": activity_data
+            }
+        }
 
         data = {
             "title": str(export_project_data[0]),
@@ -636,22 +702,85 @@ def projects_view(project_id):
             "short_note": str(export_project_data[3]),
         }
 
-        data.update(protocol_data)
+        data.update(run_data)
 
         with open(yaml_file, 'w') as file_handler:
             dump(data, file_handler, default_flow_style=False)
 
-        redirect('/websuite/download/export_%s_%s.yaml' % (project_id, protocol_id))
+        redirect('/websuite/download/export_%s_%s.yaml' % (project_id, run_id))
 
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    return template(content, file_list=file_list_filter, project_log=project_log, project_activity_data= project_activity_data.fetchall()[:5], project_config=project_config, project_data=project_data,protocols_list=protocols_list, now=now)
+    return template(content, run_notes_list=run_notes_list, project_log=project_log, project_activity_data= project_activity_data[:5], project_config=project_config, project_data=project_data,runs_list=runs_list, now=now)
 
 
-@app.route('/websuite/project/:project_id/activity')
-def activity(project_id):
+@app.route('/websuite/runs/:run_id')
+def run_veiw(run_id):
+    """
+    This provides view of a run using its identification number with notes and latest executed activities.
+    :param run_id: identification number of a run
+    :return:
+    """
+    now = datetime.now().strftime(footer_timeformat)
+    print run_id
+    run_dir = db_object.do_select("select w_dir from runs where run_id=?", (run_id, )).fetchone()[0]
+
+    file_list = os.listdir(run_dir)
+    file_list_filter = []
+    for file in file_list:
+        if not file.startswith("#") and not file.endswith("#"):
+            file_list_filter.append(file)
+
+    qs_string = request.query_string
+    download_file = None
+
+    if "download_file=" in qs_string:
+        download_file = qs_string.split('download_file=')[1].split('&')[0]
+        print download_file
+
+    if download_file != None:
+        return static_file(download_file, root='%s' %(run_dir), download=download_file)
+
+    run_activity_data = db_object.do_select(
+        "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where run_id = ? ORDER BY id DESC",
+        (run_id,)).fetchall()
+
+    content = open(os.path.join(HTML_DIR, 'run-view.html')).read()
+    return template(content, file_list=file_list_filter,
+                    run_id=run_id,
+                    run_activity_data=run_activity_data[:5],
+                    now=now)
+
+
+
+@app.route('/websuite/runs/:run_id', method='POST')
+def run_veiw_notes(run_id):
+    """
+    This submits the notes regarding on the run.
+    :param run_id: identification number of a run
+    :return:
+    """
+    run_notes = request.forms.get('run_notes')
+    db_object.do_insert("INSERT INTO notes (note, run_id) values (?, ?)", (run_notes, run_id, ))
+    redirect('/websuite/runs/%s' %(run_id))
+
+# @app.route('/websuite/runs/:run_id')
+# def download_run_file(run_id):
+
+
+@app.route('/websuite/runs/:run_id/activity')
+def activity(run_id):
+    """
+    This shows the whole activities done with details in a particular run.
+    :param run_id: identification number of a run
+    :return:
+    """
     now = datetime.now().strftime(footer_timeformat)
 
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id)).fetchone()
+    project_id = db_object.do_select(
+        "select project_id from project_activity where run_id = ? ORDER BY id DESC",
+        (run_id,)).fetchone()[0]
+
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?" , (project_id, )).fetchone()
     qs_string = request.query_string
 
     # Filter by command name and project id.
@@ -666,15 +795,15 @@ def activity(project_id):
 
     if command_name:
         command_name += '%'
-        project_activity_data = db_object.cur.execute(
-            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id= ? and command LIKE ? ORDER BY id DESC",(project_id, command_name,))
+        run_activity_data = db_object.cur.execute(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id= ? and command LIKE ? ORDER BY id DESC",(run_id, command_name,))
 
     else:
-        project_activity_data = db_object.do_select(
-            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  where  project_id= ?  ORDER BY id DESC", (project_id))
+        run_activity_data = db_object.do_select(
+            "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity  where  project_id= ?  ORDER BY id DESC", (run_id))
 
-    content = open(os.path.join(HTML_DIR, 'project-status.html')).read()
-    return template(content, filter_commands=filter_commands, project_activity_data=project_activity_data.fetchall(), project_data=project_data, now=now)
+    content = open(os.path.join(HTML_DIR, 'run-status.html')).read()
+    return template(content, filter_commands=filter_commands, run_activity_data=run_activity_data.fetchall(), project_data=project_data, now=now)
 
 
 

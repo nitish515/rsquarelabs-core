@@ -56,11 +56,12 @@ class Gromacs:
         self.mdp_file_min = kwargs.get('mdp_file_min', None)
         self.mdp_file = kwargs.get('mdp_file', None)
         
-        self.protocol_id = kwargs.get('protocol_id', None)
+        self.run_id = kwargs.get('run_id', None)
 
         """ Project directory / working directory """
         self.project_id = kwargs.get('project_id', None)
         self.working_dir = kwargs.get('working_dir', None)
+        # self.db_object = kwargs.get('db_object', 'default_one')
 
 
 
@@ -110,20 +111,20 @@ class Gromacs:
     #
     def gather_files(self):
         """
-        This method is called during the init, if any files are parsed while initiaing the class, those files
+        This method is called during the init, if any files are parsed while initiating the class, those files
         will be imported automatically.
 
         :return:
         """
         if self.receptor_file_path:
-            import_files(self.receptor_file_path, self.working_dir, self.project_id, self.protocol_id)
+            import_files(self.receptor_file_path, self.working_dir, self.project_id, self.run_id)
             os.chmod(self.working_dir, 0777)
 
         if self.ligand_file_path:
-            import_files(self.ligand_file_path, self.working_dir, self.project_id, self.protocol_id)
+            import_files(self.ligand_file_path, self.working_dir, self.project_id, self.run_id)
 
         if self.ligand_topology_file_path:
-            import_files(self.ligand_topology_file_path, self.working_dir, self.project_id, self.protocol_id)
+            import_files(self.ligand_topology_file_path, self.working_dir, self.project_id, self.run_id)
 
 
 
@@ -142,7 +143,7 @@ class Gromacs:
             os.path.join(self.working_dir , output_name) + " -ignh -p " + \
                   os.path.join(self.working_dir, "topol.top" ) + " -i " +  \
                   os.path.join(self.working_dir ,"posre.itp") + " -ff gromos53a6 -water spc "
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
 
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
@@ -245,7 +246,7 @@ class Gromacs:
             os.path.join(self.working_dir , output_name) + " -bt cubic -d 1 -c "
 
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -260,7 +261,7 @@ class Gromacs:
         command = solvate + " -cp " + os.path.join(self.working_dir, input_name) + " -p " + \
                   os.path.join(self.working_dir, "topol.top") + " -cs spc216.gro -o " + \
             os.path.join(self.working_dir , output_name)
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -276,7 +277,7 @@ class Gromacs:
                   os.path.join(self.working_dir , output_name) + " -p " + \
                   os.path.join(self.working_dir, "topol.top") + " -nname CL -pname NA -neutral << EOF\nSOL\nEOF"
         print command
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -292,7 +293,7 @@ class Gromacs:
             os.path.join(self.working_dir, input_name) + " -p " + \
                   os.path.join(self.working_dir , "topol.top")+ " -o " + os.path.join(self.working_dir , output_name) + " -po " + \
                   os.path.join(self.working_dir, "mdout.mdp") + " -maxwarn 3"
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 
 
@@ -311,5 +312,5 @@ class Gromacs:
                   os.path.join(self.working_dir, input_with_no_extension) +".trr -e " + os.path.join(self.working_dir , input_with_no_extension) +".edr -x " + \
                   os.path.join(self.working_dir, input_with_no_extension) + ".xtc -g " + \
                   os.path.join(self.working_dir, input_with_no_extension) + ".log  -nt " + str(nt)
-        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.protocol_id, parent_method_name, parent_method_serial,command_method)
+        run_and_record_process( step_no, step_name, command, TOOL_NAME, log_file, self.project_id, self.run_id, parent_method_name, parent_method_serial,command_method)
         self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))

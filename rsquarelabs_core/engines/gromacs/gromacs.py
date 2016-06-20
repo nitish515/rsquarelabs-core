@@ -4,7 +4,7 @@ from core.messages import welcome_message, backup_folder_already_exists, \
     write_em_mpd_data, create_em_mdp_data
 from core import settings
 from rsquarelabs_core.engines.db_engine import DBEngine, RSQ_DB_PATH
-from rsquarelabs_core.engines.gromacs import  Gromacs
+from rsquarelabs_core.engines.gromacs import Gromacs
 from core.messages import  write_em_mpd_data, create_em_mdp_data, ions_mdp, minim_mdp
 import logging
 """
@@ -33,7 +33,7 @@ class ProteinMin(Gromacs):
 
     def import_files(self):
         """
-        For this protocol we dont need many files, just protein is the input
+        For this run we dont need many files, just protein is the input
 
         :return:
         """
@@ -45,7 +45,7 @@ class ProteinMin(Gromacs):
             for format in protein_file_formats:
                 if protein_file_path.endswith(format) and os.path.isfile(protein_file_path):
                     break
-        import_files(protein_file_path, self.working_dir, self.project_id, self.protocol_id )
+        import_files(protein_file_path, self.working_dir, self.project_id, self.run_id )
 
     def write_ions_mdp(self):
         """
@@ -98,7 +98,7 @@ class ProteinMin(Gromacs):
 
 class ProteinLigMin(object):
     """
-    ProteinLigandMin is a class that has all the methods to run a Protein-ligand Minimisation protocol using the tool -
+    ProteinLigandMin is a class that has all the methods to run a Protein-ligand Minimisation run using the tool -
     gromacs(gromacs.org).
     The module is designed based on tutorial by Justin Lemkul from Benvan Labs
     (http://www.bevanlab.biochem.vt.edu/Pages/Personal/justin/gmx-tutorials/complex/)
@@ -138,7 +138,7 @@ class ProteinLigMin(object):
             print 'Can\'t use both the verbose and quiet flags together'
             sys.exit()
 
-    def import_files(project_path, project_id, protocol_id):
+    def import_files(project_path, project_id, run_id):
 
         """
         This will import the files into the projects into the path. All the files imported via this method should be backed to

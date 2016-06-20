@@ -14,7 +14,7 @@
     <div class="container pageview">
 
         <h1>Automator</h1>
-        <p>Make bots for all the routine works in your research, create custom protocols
+        <p>Make bots for all the routine works in your research, create custom runs
             and let the automator take care of everything. </p>
 
         <div class="row">
@@ -27,9 +27,9 @@
                             <div class="form-group">
                                 <label for="protocol">Protocol name:</label>
                                 %if protocol_initial_data == None:
-                                    <input type="text" class="form-control" name="name" id="protocol">
+                                    <input type="text" class="form-control" name="run_name" id="protocol">
                                 %else:
-                                    <input type="text" class="form-control" value="{{protocol_initial_data[1]}}" name="name" id="protocol">
+                                    <input type="text" class="form-control" value="{{protocol_initial_data[0]}}" name="run_name" id="protocol">
                                 %end
                             </div>
                         </div>
@@ -60,11 +60,11 @@
 
                         <label for="commands"> Type your commands: </label>
                         %if protocol_initial_data != None:
-                            <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{protocol_initial_data[5]}}</textarea>
+                            <textarea class="form-control" rows="15"  name="run_data" id="commands">{{protocol_initial_data[1]}}</textarea>
                         %elif project_recreate_data != None:
-                            <textarea class="form-control" rows="15"  name="protocol_data" id="commands">{{project_recreate_data}}</textarea>
+                            <textarea class="form-control" rows="15"  name="run_data" id="commands">{{project_recreate_data}}</textarea>
                         %else:
-                            <textarea class="form-control" rows="15" name="protocol_data" id="commands"></textarea>
+                            <textarea class="form-control" rows="15" name="run_data" id="commands"></textarea>
                         %end
                     </div>
                     <button type="submit" class="btn btn-success btn-lg"><strong>Execute</strong></button>
