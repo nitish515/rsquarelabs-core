@@ -25,8 +25,18 @@ logger.addHandler(handler)
 
 class DBEngine:
 
-    def __init__(self, db_name):
+    def __init__(self, db_name=RSQ_DB_PATH):
         self.do_connect(db_name)
+        """
+        self.conn , self.cur are instalised in do_connect, but we are installising this here now,
+        so we might need to change do_connect(), but all we are doing there is instalising
+        """
+        self.conn = sqlite3.connect(db_name)
+        self.cur = self.conn.cursor()
+
+
+
+
 
     def do_connect(self, db_name):
         self.conn = sqlite3.connect(db_name)
