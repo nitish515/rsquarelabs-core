@@ -68,7 +68,7 @@ class Gromacs:
         if self.working_dir:
             if os.path.exists(self.working_dir):
                 shutil.rmtree(self.working_dir)
-            print self.working_dir
+            #print self.working_dir
             os.mkdir(self.working_dir,0777)
 
         # logger
