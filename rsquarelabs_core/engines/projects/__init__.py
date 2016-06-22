@@ -54,17 +54,17 @@ class Project(object):
 
     def create_run(self, *args, **kwargs):
 
-        self.run_name = kwargs.get('run_name', None)
-        self.version = kwargs.get('version', None)
-        self.parent_run_id = kwargs.get('parent_run_id', None)
-        self.master_id = kwargs.get('master_id', None)
-        self.run_data = kwargs.get('run_data', None)
-        self.is_delete = kwargs.get('is_delete', None)
-        self.project_id = kwargs.get('project_id', None)
-        self.protocol_class_name = kwargs.get('protocol_class_name', None)
+        run_name = kwargs.get('run_name', None)
+        version = kwargs.get('version', None)
+        parent_run_id = kwargs.get('parent_run_id', None)
+        master_id = kwargs.get('master_id', None)
+        run_data = kwargs.get('run_data', None)
+        is_delete = kwargs.get('is_delete', None)
+        project_id = kwargs.get('project_id', None)
+        protocol_class_name = kwargs.get('protocol_class_name', None)
 
         db_object.do_insert(" INSERT INTO runs (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, class_name)\
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (self.run_name, self.version, self.parent_run_id, self.master_id, self.run_data, self.is_delete, self.project_id, self.protocol_class_name, ))
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, protocol_class_name, ))
 
         run_id = db_object.cur.lastrowid
 
