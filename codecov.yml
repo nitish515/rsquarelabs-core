@@ -1,0 +1,26 @@
+codecov:
+  branch: dev
+  bot: null
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  
+  status:
+    project:
+      default:
+        target: auto
+        threshold: null
+        branches: null
+  
+    patch:
+      default:
+        target: auto
+        branches: null
+  
+    changes:
+      default:
+        branches: null
+  
+  ignore: null
