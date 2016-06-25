@@ -1,7 +1,8 @@
 # framework
 
-[![Build Status](https://travis-ci.org/rsquarelabs/framework.svg?branch=dev)](https://travis-ci.org/rsquarelabs/framework)
+[![Build Status](https://travis-ci.org/rsquarelabs/rsquarelabs-core.svg?branch=dev)](https://travis-ci.org/rsquarelabs/rsquarelabs-core)
 [![Requirements Status](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements/?branch=dev)
+[![codecov](https://codecov.io/gh/rsquarelabs/rsquarelabs-core/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/rsquarelabs-core)
 
 ![framework hero ](docs/images/rsquarelabs-hero.jpg)
 
@@ -10,8 +11,8 @@ This is the library of automation pipeline modules
 [Website](http://rsquarelabs.org) |
 [Documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki/) |
 [Installation](https://github.com/rsquarelabs/rsquarelabs-core/wiki#installation) |
-[Mailing List](https://groups.google.com/d/forum/framework) |
-[Gitter Chat](https://gitter.im/rsquarelabs/framework)
+[Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
+[Gitter Chat](https://gitter.im/rsquarelabs/rsquarelabs-core)
 
 
 ## Summary
