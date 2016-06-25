@@ -29,7 +29,9 @@ create a [new issue](https://github.com/rsquarelabs/rsquarelabs-core/issues/new)
 ## <a name="code"></a>Browsing the code?
 
 We work on two branches: 
+
 - `master` for stable, released code
+
 - `dev`, a development branch. 
 
 It might be important to distinguish them when you are reading the commit history 
