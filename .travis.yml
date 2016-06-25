@@ -4,10 +4,15 @@ language: python
 python:
     - "2.7"
 
-
+services:
+  - docker
 
 before_install:
-  - echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
+
+   - docker pull rsquarelabs/framework-denv
+   - docker run
+
+  #- echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
   #- sudo apt-get update
   #- sudo apt-get install gromacs
 
