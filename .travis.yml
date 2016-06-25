@@ -8,8 +8,8 @@ python:
 
 before_install:
   - echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
-  - sudo apt-get update
-  - sudo apt-get install gromacs
+  #- sudo apt-get update
+  #- sudo apt-get install gromacs
 
   ## the below code uses manual installatiion which we might need for multiple versions of gromacs(incase)
   # - sudo apt-get update
@@ -27,6 +27,7 @@ before_install:
 
 script:
   - uname
+  - pip install -r requirements/dev-requirements.txt
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
