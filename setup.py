@@ -22,6 +22,31 @@ def get_version(package):
     init_py = open(os.path.join(package, '__init__.py')).read()
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
+def get_packages(package):
+    """
+    Return root package and all sub-packages.
+    """
+    return [dirpath
+            for dirpath, dirnames, filenames in os.walk(package)
+            if os.path.exists(os.path.join(dirpath, '__init__.py'))]
+
+
+def get_package_data(package):
+    """
+    Return all files under the root package, that are not in a
+    package themselves.
+    """
+    walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
+            for dirpath, dirnames, filenames in os.walk(package)
+            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
+
+    filepaths = []
+    for base, filenames in walk:
+        filepaths.extend([os.path.join(base, filename)
+                          for filename in filenames])
+    return {package: filepaths}
+
+
 
 version = get_version('rsquarelabs_core')
 
@@ -58,8 +83,10 @@ long_description= readme,
 author='Ravi RT Merugu',
 author_email='rrmerugu@gmail.com',
 url = github_url,
-packages = find_packages(),
-package_data={'rsquarelabs_core' : ['*']},
+# packages = find_packages(),
+# package_data={'rsquarelabs_core' : ['*']},
+packages=get_packages('rsquarelabs_core'),
+package_data=get_package_data('rsquarelabs_core'),
 install_requires=['bottle','termcolor','requests'],
 download_url='%s/tarball/%s' %(github_url,version ),
 keywords = ['Computational Biology', 'Molecular Modelling', 'Bioinformatics', 'Automation'])
