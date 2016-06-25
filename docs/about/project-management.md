@@ -58,49 +58,6 @@ improvement can be actively worked on regardless of your collaborator status on 
 
 
 
-##  Release process
-
-The release manager is selected on every quarterly maintenance cycle.
-
-1. The manager should be selected by [@rrmerugu](https://github.com/rrmerugu).
-2. The manager will then have the maintainer role added to PyPI package.
-3. The previous manager will then have the maintainer role removed from the PyPI package.
-
-Our PyPI releases will be handled by either the current release manager, or by [@rrmerugu](https://github.com/rrmerugu). 
-Every release should have an open issue tagged with the Release label and marked against the appropriate milestone.
-
-The following template should be used for the description of the issue, and serves as a release checklist.
-
-
-
-```
-Release manager is @***.
-Pull request is #***.
-
-During development cycle:
-
-- [ ] Upload the new content to be translated to [transifex](https://github.com/rsquarelabs/framework/about/project-management/#translations).
-
-
-Checklist:
-
-- [ ] Create pull request for [release notes](https://github.com/rsquarelabs/framework/blob/master/docs/topics/release-notes.md) based on the [*.*.* milestone](https://github.com/rrmerugu/framework/milestones/***).
-- [ ] Ensure the pull request increments the version to `*.*.*` in [`rsquarelabs_core/__init__.py`](https://github.com/rsquarelabs/framework/blob/master/rsquarelabs_core/__init__.py).
-- [ ] Confirm with @rrmerugu that release is finalized and ready to go.
-- [ ] Ensure that release date is included in pull request.
-- [ ] Merge the release pull request.
-- [ ] Push the package to PyPI with `./setup.py publish`.
-- [ ] Tag the release, with `git tag -a *.*.* -m 'version *.*.*'; git push --tags`.
-- [ ] Deploy the documentation with `mkdocs gh-deploy`.
-- [ ] Make a release announcement on the [discussion group](https://groups.google.com/forum/?fromgroups#!forum/django-rest-framework).
-- [ ] Make a release announcement on twitter.
-- [ ] Close the milestone on GitHub.
-
-To modify this process for future releases make a pull request to the [project management](https://rsquarelabs.github.com/framework/about/project-management/) documentation.
-
-```
-
-
 ## Project requirements
 
 All our test requirements are pinned to exact versions, in order to ensure that our test runs are reproducible. 

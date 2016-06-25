@@ -25,7 +25,7 @@ pages:
 - About:
     - License : about/license.md
     - Contributing : about/contributing.md
-    - Release : about/release-notes.md
+    - Release Management : about/release-notes.md
     - Project Management : about/project-management.md
 copyright: Copyright &copy; 2016 <a href="https://twitter.com/rrmerugu">rsquarelabs.com</a>
 google_analytics: ['UA-71847416-1', 'docs.rsquarelabs.com']
