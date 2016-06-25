@@ -22,6 +22,8 @@ To add a new page for the documentation, please follow the steps:
 
 Use `mkdocs serve` , then you will be able to access the `http://localhost:8000` . 
 
+You can use `mkdocs build` to generate a build in the folder `site` .
+
 
 ## Deploying to gh-pages
 
@@ -29,4 +31,6 @@ Make the necessary changes and pull the latest code, then do the command
 ```
 mkdocs gh-deploy --clean
 ```
+This will create a build in the folder `site` and push to the `gh-pages` branch.
+
 It will ask you for your github credentails, if you have permissions to push to the framework repository, it will generate a build and deploys it to the 

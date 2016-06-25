@@ -3,7 +3,7 @@ site_url: http://docs.rsquarelabs.com/sdk/framework
 repo_url: https://github.com/rsquarelabs/framework
 theme_dir : docs_theme
 docs_dir: docs
-use_directory_urls: false
+use_directory_urls: true
 
 markdown_extensions:
  - toc:

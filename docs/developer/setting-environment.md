@@ -1,7 +1,7 @@
 # Development Env Setup
 
 
-This is the first time setup doc for the developer.
+This is the first time setup doc for the developers.
 
 ## First time installation 
 
