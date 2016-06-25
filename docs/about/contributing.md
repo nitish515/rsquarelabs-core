@@ -3,7 +3,7 @@
 
 
 The best way to contribute to the roadmap and feature discussions is by talking with the RSQUARELABS Team and 
-rsquarelabs-core Community in realtime through the Gitter chat, or by starting a [new issue](https://github.com/rsquarelabs/framework/issues/new) as a discussion thread.
+rsquarelabs-core Community in realtime through the Gitter chat, or by starting a [new issue](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) as a discussion thread.
 
 - [Got a Question or Problem](#gaqp)
 - [Browsing the code](#code)
@@ -23,8 +23,8 @@ rsquarelabs-core Community in realtime through the Gitter chat, or by starting a
  
 ## <a name="gaqp"></a> Got a question or problem?
 
-Search for your question or problem in the [existing issues](https://github.com/rsquarelabs/framework/issues) or 
-create a [new issue](https://github.com/rsquarelabs/framework/issues/new) to start a new discussion thread. 
+Search for your question or problem in the [existing issues](https://github.com/rsquarelabs/rsquarelabs-core/issues) or 
+create a [new issue](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) to start a new discussion thread. 
 
 ## <a name="code"></a>Browsing the code?
 
@@ -60,8 +60,8 @@ If you'd like to implement a new feature, please consider opening an issue first
 
 1. Fork the `rsquarelabs/framework` repository! 
 2. Clone the repository to your local machine. 
-3. Select an issue from [rsquarelabs/framework](https://github.com/rsquarelabs/framework/issues?q=is%3Aopen) to work on or 
-[submit a proposal](https://github.com/rsquarelabs/framework/issues/new) of your own.
+3. Select an issue from [rsquarelabs/framework](https://github.com/rsquarelabs/rsquarelabs-core/issues?q=is%3Aopen) to work on or 
+[submit a proposal](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) of your own.
 4. Create a feature or hotfix, or fix  branch depending on the type of issue.
 5. Write the `tests` needed, take care of Python 2 & 3 compatibility issues. 
 6. Modify existing or add new `.md` files to the docs directory.

@@ -49,7 +49,7 @@ Further notes for maintainers:
 1. Code changes should come in the form of a pull request - do not push directly to master.
 2. Maintainers should typically not merge their own pull requests.
 3. Each issue/pull request should have exactly one label once triaged.
-4. Search for un-triaged issues with [is:open no:label](https://github.com/rsquarelabs/framework/issues?q=is%3Aopen+no%3Alabel).
+4. Search for un-triaged issues with [is:open no:label](https://github.com/rsquarelabs/rsquarelabs-core/issues?q=is%3Aopen+no%3Alabel).
 
 
 It should be noted that participating actively in this project clearly 
