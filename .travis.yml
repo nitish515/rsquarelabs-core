@@ -11,7 +11,7 @@ before_install:
 
    - sudo docker ps -l
    - docker pull rsquarelabs/framework-denv:beta
-   - docker run rsquarelabs/framework-denv:beta
+   - docker run -t -i rsquarelabs/framework-denv:beta /bin/bash
    - sudo docker ps -l
 
   #- echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
