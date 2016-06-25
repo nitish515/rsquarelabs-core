@@ -5,7 +5,7 @@ This is the first time setup doc for the developers.
 
 ## First time installation 
 
-```
+```bash
 git clone https://github.com/rsquarelabs/framework
 virtualenv venv
 source venv/bin/activate
@@ -36,13 +36,11 @@ In Fedora/CentOS `sudo yum install gromacs`
 
 Once this package is installed via `pip install rsquarelabs-core` , all the python scripts in sbin are supposed to be accessbile from anywhere, 
 but to simulate that behaviour in the development, we can create alias for these commands in `.bashrc` or add a softlink, here is how to
-add these commands in `.bashrc`
-
-`gedit ~/.bashrc`
+add these commands in `.bashrc` ie., `gedit ~/.bashrc`
 
 add the following lines 
 
-```
+```bash
 alias r2_gromacs='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_gromacs.py'
 alias r2_server_start='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_server_start.py'
 ```

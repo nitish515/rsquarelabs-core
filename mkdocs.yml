@@ -1,6 +1,8 @@
 site_name: R2-CORE Framework
 site_url: http://docs.rsquarelabs.com/sdk/framework
 repo_url: https://github.com/rsquarelabs/framework
+
+docs_url: http://rsquarelabs.github.io/framework
 theme_dir : docs_theme
 docs_dir: docs
 use_directory_urls: true
@@ -11,14 +13,19 @@ markdown_extensions:
 
 pages:
 - Home: index.md
-- Tutorial:
-    - Quickstart : user/tutorial/quickstart.md
-- Dev Guides:
-    - Project : developer/modules/project.md
-    - Gromacs : developer/modules/gromacs.md
-    - Documentation : developer/documentation.md
-    - Environment Setup: developer/setting-environment.md
+- User Guide:
+    - Quickstart : user-guide/tutorial/quickstart.md
 
+- Dev Guide:
+    - Project : dev-guide/modules/project.md
+    - Gromacs : dev-guide/modules/gromacs.md
+    - Documentation : dev-guide/documentation.md
+    - Environment Setup: dev-guide/setting-environment.md
 
+- About:
+    - License : about/license.md
+    - Contributing : about/contributing.md
+    - Release : about/release-notes.md
+    - Project Management : about/project-management.md
 copyright: Copyright &copy; 2016 <a href="https://twitter.com/rrmerugu">rsquarelabs.com</a>
 google_analytics: ['UA-71847416-1', 'docs.rsquarelabs.com']

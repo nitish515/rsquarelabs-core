@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/rsquarelabs/framework.svg?branch=dev)](https://travis-ci.org/rsquarelabs/framework)
 [![Requirements Status](https://requires.io/github/rsquarelabs/framework/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/framework/requirements/?branch=dev)
 
-![framework hero ](_docs/images/rsquarelabs-hero.jpg)
+![framework hero ](docs/images/rsquarelabs-hero.jpg)
 
 This is the library of automation pipeline modules
 

@@ -1,6 +1,6 @@
-# Documentation
+# Documentation Rules
 
-
+This section explains how to document the modules inside this tool.
 
 
 ## Adding a Page
@@ -13,10 +13,10 @@ To add a new page for the documentation, please follow the steps:
 ```
 - Dev Guides:
     - Environment Setup: developer/setting-environment.md
-    - Some Page : developer/somepage.md
+    - Some Page : dev-guide/somepage.md
 
 ```
-**Note:** Create the page in `developer` folder in `docs` if it belongs to developer docs, or in `user` for user docs
+**Note:** Create the page in `dev-guide` folder in `docs` if it belongs to developer docs, or in `user-guide` for user docs
 
 ## Generating the Docs 
 

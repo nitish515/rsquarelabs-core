@@ -222,6 +222,13 @@ h2,.h2{
     margin-top: 40px;
 }
 
+h3, .h3 {
+    font-size: 20px;
+}
+
+h1, h2, h3, h4, h5 {
+    font-weight: 400;
+}
 body {
     font-size: 14px;
 
@@ -229,10 +236,13 @@ body {
 .dropdown-menu>li>a {
     padding: 8px 15px !important;
 }
-p, ul li{
+p, ul li, ol li{
     line-height:1.9em;
 }
 ul.nav li {
     line-height: 1.4em;
 }
 
+pre{
+    font-size: 13px;
+}
