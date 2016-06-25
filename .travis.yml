@@ -9,7 +9,7 @@ services:
 
 before_install:
 
-   - docker pull rsquarelabs/framework-denv
+   - docker pull rsquarelabs/framework-denv:beta
    - docker run
 
   #- echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
