@@ -9,28 +9,8 @@ services:
 
 before_install:
 
-   - sudo docker ps -l
    - docker pull rsquarelabs/framework-denv:beta
-   - docker run -t -i rsquarelabs/framework-denv:beta /bin/bash
-   - sudo docker ps -l
-
-  #- echo "deb http://cz.archive.ubuntu.com/ubuntu precise main universe" | sudo tee -a /etc/apt/sources.list
-  #- sudo apt-get update
-  #- sudo apt-get install gromacs
-
-  ## the below code uses manual installatiion which we might need for multiple versions of gromacs(incase)
-  # - sudo apt-get update
-  # - sudo apt-get install -y wget build-essential cmake file libxml2-dev libboost-dev
-  # - wget ftp://ftp.gromacs.org/pub/gromacs/gromacs-4.6.5.tar.gz
-  # - tar -xf gromacs-4.6.5.tar.gz
-  # - cd gromacs-4.6.5
-  # - mkdir build
-  # - cd build/
-  # - cmake .. -DGMX_BUILD_OWN_FFTW=ON -DREGRESSIONTEST_DOWNLOAD=ON
-  # - make
-  # - sudo make install
-  # - source /usr/local/gromacs/bin/GMXRC
-  # - pip install codecov
+   - docker run rsquarelabs/framework-denv:beta
 
 script:
   - uname
