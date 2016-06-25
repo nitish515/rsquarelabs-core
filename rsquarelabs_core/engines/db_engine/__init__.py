@@ -66,3 +66,11 @@ class DBEngine:
             logger.error(e.message)
         return self.cur
 
+    def do_update(self, cmd, params):
+        try:
+            self.cur.execute(cmd, params)
+            self.conn.commit()
+        except Exception as e:
+            logger.error(e)
+            logger.error(e.message)
+        return self.cur

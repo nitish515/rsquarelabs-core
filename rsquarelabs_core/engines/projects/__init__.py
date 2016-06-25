@@ -15,35 +15,38 @@ class Project(object):
         # check if the project-key exist in db,
         # check if the project-key exist in rsquareProjects
 
-        self.project_title = kwargs.get('project_title', None)
-        self.project_tags = kwargs.get('project_tags', None)
-        self.project_user_email = kwargs.get('project_user_email', None)
-        self.project_slug = kwargs.get('project_slug', None)
-        self.project_short_note = kwargs.get('project_short_note', None)
+        project_title = kwargs.get('project_title', None)
+        project_tags = kwargs.get('project_tags', None)
+        project_user_email = kwargs.get('project_user_email', None)
+        project_slug = kwargs.get('project_slug', None)
+        project_short_note = kwargs.get('project_short_note', None)
+        project_path = kwargs.get('project_path', None)
+        # project_config = kwargs.get('project_config', None)
+        # project_log = kwargs.get('project_log', None)
 
-        PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, self.project_slug)
+        # PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_slug)
 
-        if os.path.exists(PROJECT_PATH):
-            #print "ERROR: Project name already exists"
-            os.rmdir(PROJECT_PATH)
-            os.mkdir(PROJECT_PATH, 0755)
-        else:
-            os.mkdir(PROJECT_PATH, 0755)
+        # if os.path.exists(PROJECT_PATH):
+        #     #print "ERROR: Project name already exists"
+        #     os.rmdir(PROJECT_PATH)
+        #     os.mkdir(PROJECT_PATH, 0755)
+        # else:
+        #     os.mkdir(PROJECT_PATH, 0755)
 
         project_type ="r2_gromacs"
         project_date = datetime.now().strftime("%Y-%m-%d %H:%M")
         is_delete = 0
-        project_path = PROJECT_PATH
-        project_log = os.path.join(PROJECT_PATH, 'r2_gromacs.log')
-        project_config = os.path.join(PROJECT_PATH, 'r2_gromacs.config')
+        # project_path = PROJECT_PATH
+        project_log = os.path.join(project_path, 'r2_gromacs.log')
+        project_config = os.path.join(project_path, 'r2_gromacs.config')
 
         db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date, is_delete)\
             VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                   (self.project_title,
-                                    self.project_tags,
-                                    self.project_user_email,
-                                    self.project_slug,
-                                    self.project_short_note,
+                                   (project_title,
+                                    project_tags,
+                                    project_user_email,
+                                    project_slug,
+                                    project_short_note,
                                     project_path,
                                     project_config,
                                     project_log,
@@ -51,6 +54,11 @@ class Project(object):
                                     project_date,
                                     is_delete,))
         # return cur
+        project_id = db_object.cur.lastrowid
+
+        return project_id
+
+
 
     def create_run(self, *args, **kwargs):
 

@@ -25,6 +25,7 @@ Command 'importfiles' should be executed in the project directory
 from termcolor import colored, cprint
 import sys, os, json, requests
 
+
 from datetime import datetime
 from termcolor import cprint
 
@@ -47,6 +48,7 @@ rsquarelabs_core should be imported after the CORE_DIR is added to sys.path
 """
 from rsquarelabs_core.config import RSQ_PROJECTS_HOME, RSQ_DB_PATH
 from rsquarelabs_core.engines.db_engine import DBEngine
+from rsquarelabs_core.engines.projects import Project
 from rsquarelabs_core.engines.gromacs.gromacs import ProteinLigMin, ProteinMin
 from rsquarelabs_core.engines.gromacs.core.messages import  welcome_message
 
@@ -61,7 +63,7 @@ CURRENT_PATH = os.getcwd()
 
 TOOL_NAME = "r2_gromacs"
 db_object = DBEngine(RSQ_DB_PATH)
-
+create_project = Project()
 
 def current_date():
     """
@@ -86,7 +88,7 @@ def show_commands():
 
 def main():
     # Get the arguments list
-    cmdargs = str(sys.argv)
+    cmdargs = sys.argv
 
     # Check if config file exist in the working dir.
 
@@ -103,7 +105,16 @@ def main():
 
     if not 'init' in cmdargs:
 
+
         # Creating a object to the ProteinLigMin class
+
+
+        if len(cmdargs) == 1:
+            print "ERROR: Follow the allowed commands"
+            show_commands()
+            exit()
+
+
 
 
         # TODO - read the .yaml or project data and decide which protocol type is this
@@ -205,31 +216,45 @@ def main():
             os.mkdir(PROJECT_PATH, 0755)
         else:
             os.mkdir(PROJECT_PATH, 0755)
-        project_data["log"] = os.path.join(PROJECT_PATH, 'r2_gromacs.log')
-        project_data["config"] = os.path.join(PROJECT_PATH, 'r2_gromacs.config')
-        fh_log = open(project_data["log"], 'w', 0755)
-        fh_config = open(project_data["config"], 'w', 0755)
+
 
         # preprocessing data
         project_data["path"] = PROJECT_PATH
 
+        #
+        #
+        # cur = db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date, is_delete)\
+        #                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        #                  (project_data["title"],
+        #                    project_data["tags"],
+        #                    project_data["user_email"],
+        #                    project_data["slug"],
+        #                    project_data["short_note"],
+        #                    project_data["path"],
+        #                    project_data["config"],
+        #                    project_data["log"],
+        #                    project_data["type"],
+        #                    project_data["date"],
+        #                    is_delete, ))
+
+        created_project_id = create_project.create(project_title=project_data["title"], project_tags=project_data["tags"], project_user_email=project_data["user_email"],
+                                                   project_short_note=project_data["short_note"], project_slug=project_data["slug"],project_path=project_data["path"])
+
+        # project_data["log"] = os.path.join(PROJECT_PATH, 'r2_gromacs.log')
+        # project_data["config"] = os.path.join(PROJECT_PATH, 'r2_gromacs.config')
 
 
-        cur = db_object.do_insert("INSERT INTO projects (title, tags, user_email, slug, short_note, path, config, log, type, date, is_delete)\
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                         (project_data["title"],
-                           project_data["tags"],
-                           project_data["user_email"],
-                           project_data["slug"],
-                           project_data["short_note"],
-                           project_data["path"],
-                           project_data["config"],
-                           project_data["log"],
-                           project_data["type"],
-                           project_data["date"],
-                           is_delete, ))
 
-        if cur.lastrowid: # if created into db
+        log_config = db_object.do_select("select log, config from projects where id = ?", (created_project_id, )).fetchone()
+        project_data["log"] = log_config[0]
+        project_data["config"] = log_config[1]
+
+
+
+        fh_log = open(project_data["log"], 'w', 0755)
+        fh_config = open(project_data["config"], 'w', 0755)
+
+        if created_project_id: # if created into db
             from random import randint
             project_create_details = project_data # json.loads(project_data)
             project_create_details['project_id'] = randint(1,1000)
@@ -237,7 +262,7 @@ def main():
 
             mesg = """============================================
 Project created with id '%s',
-============================================""" % cur.lastrowid
+============================================""" % created_project_id
             # fh_config.write(cur.lastrowid)
             cprint(mesg, "green")
         else:
