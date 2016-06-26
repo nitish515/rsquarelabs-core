@@ -15,6 +15,7 @@ before_install:
 install :
    - pip install tox-travis
    - pip install -r requirements/dev-requirements.txt
+   - pip install -r requirements/testing-requirements.txt
    - pip install codecov
    - pip install coverage
    - python setup.py install
