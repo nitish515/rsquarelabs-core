@@ -21,7 +21,8 @@ class BaseClass(unittest.TestCase):
         print '----> 1'
         super(BaseClass, self).__init__(*args, **kwargs)
     #     #self.run_id = None
-        self.project = Project()
+        self.project = Project(project_title='tak', project_tags='gpcr4', project_user_email='hello@world.com',
+                            project_slug='tak', project_short_note='This is first project')
         self.cur = DBEngine().cur
 
 
@@ -40,14 +41,13 @@ class ProjectTest(BaseClass):
 
     def test_project_create(self):
         print "-----> 2"
-        self.project.create(project_title='tak', project_tags='gpcr4', project_user_email='hello@world.com',
-                            project_slug='tak', project_short_note='This is first project')
+        self.project.save()
 
         print "testing create "
 
     def test_run_create(self):
         print "-----> 3"
-        self.run_id = self.project.create_run(run_name="run_tak", version="1", parent_run_id="0",
+        self.run_id = self.project.save_run(run_name="run_tak", version="1", parent_run_id="0",
                                 master_id="0", run_data="This is data for running", is_delete="0",
                                 project_id="1", protocol_class_name="ProteinMin")
 
@@ -64,7 +64,7 @@ class GromacsTest(BaseClass):
     def __init__(self, *args, **kwargs):
         print "-----> 4"
         super(GromacsTest, self).__init__(*args, **kwargs)
-        self.project_test = []
+        # self.project_test = []
         self.run_id = None
         self.gromacs = None
         # super(GromacsTest, self).setUp()

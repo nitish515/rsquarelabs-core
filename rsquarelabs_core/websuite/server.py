@@ -78,7 +78,7 @@ obj.write_prod_mdp()
 
 
 db_object = DBEngine(RSQ_DB_PATH)
-create_project = Project()
+
 
 app = Bottle()
 
@@ -212,8 +212,8 @@ def automator_insert():
     #                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, protocol_class_name, ))
     #
     # run_id = db_object.cur.lastrowid
-
-    run_id = create_project.create_run(run_name=run_name, version=version, run_data=run_data,
+    save_run_obj = Project()
+    run_id = save_run_obj.save_run(run_name=run_name, version=version, run_data=run_data,
                               parent_run_id=parent_run_id, master_id=master_id,is_delete=is_delete,
                               protocol_class_name=protocol_class_name, project_id=project_id)
 
@@ -493,7 +493,7 @@ def projects_list():
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
             "runs": runs_data
@@ -568,7 +568,7 @@ def export_yaml(project_id):
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
             "runs": runs_data
@@ -611,9 +611,29 @@ def import_project():
 
     with open(import_file, 'r') as file_handler:
         data = load(file_handler)
-    slug = "%s_%s"%(data['title'], time())
-    db_object.do_insert("INSERT INTO PROJECTS (title, tags, user_email, short_note, slug, date, is_delete)\
-        VALUES (?, ?, ?, ?, ?, ?, ?) ", (data['title'], data['tags'], data['user_email'], data['short_note'], slug, datetime.now().strftime("%Y-%m-%d %H:%M"), 0))
+    # slug = "%s_%s"%(data['title'], time())
+    # db_object.do_insert("INSERT INTO PROJECTS (title, tags, user_email, short_note, slug, date, is_delete)\
+    #     VALUES (?, ?, ?, ?, ?, ?, ?) ", (data['title'], data['tags'], data['user_email'], data['short_note'], slug, datetime.now().strftime("%Y-%m-%d %H:%M"), 0))
+
+    save_project = Project(project_title=data['title'], project_tags=data['tags'],
+                           project_user_email=data['user_email'], project_short_note=data['short_note'])
+
+    project_id = save_project.save()
+
+    for run in data['runs']:
+        import_run = data['runs'][run]
+        import_file = data['runs'][run]['files']
+        file_name, file_content = import_file[0].items()[0]
+        import_steps = data['runs'][run]['steps']
+        run_data = ''
+        for step in import_steps:
+            # print step
+            step_no, step_data = step.items()[0]
+            run_data = run_data + step[step_no] + '\n'
+        run_id = save_project.save_run(run_name=import_run['run_name'], protocol_class_name=import_run['class_name']
+                                       , run_data=run_data, project_id=project_id)
+        db_object.do_insert("INSERT INTO project_files (file_name, file_content, project_id, run_id)\
+                        VALUES(?, ?, ?, ?)", (file_name, file_content, project_id, run_id))
 
     redirect('/websuite/import.html')
 
@@ -701,7 +721,7 @@ def projects_view(project_id):
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
         }

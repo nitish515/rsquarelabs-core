@@ -63,7 +63,7 @@ CURRENT_PATH = os.getcwd()
 
 TOOL_NAME = "r2_gromacs"
 db_object = DBEngine(RSQ_DB_PATH)
-create_project = Project()
+
 
 def current_date():
     """
@@ -213,13 +213,11 @@ def main():
                 project_data["slug"] = project_data["slug"].replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-').replace(":","-").replace("--","-")
                 PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_data["slug"])
-            os.mkdir(PROJECT_PATH, 0755)
-        else:
-            os.mkdir(PROJECT_PATH, 0755)
+
 
 
         # preprocessing data
-        project_data["path"] = PROJECT_PATH
+
 
         #
         #
@@ -236,41 +234,41 @@ def main():
         #                    project_data["type"],
         #                    project_data["date"],
         #                    is_delete, ))
-
-        created_project_id = create_project.create(project_title=project_data["title"], project_tags=project_data["tags"], project_user_email=project_data["user_email"],
-                                                   project_short_note=project_data["short_note"], project_slug=project_data["slug"],project_path=project_data["path"])
+        create_project = Project(project_title=project_data["title"], project_tags=project_data["tags"], project_user_email=project_data["user_email"],
+                                                   project_short_note=project_data["short_note"], project_slug=project_data["slug"])
+        created_project_id = create_project.save()
 
         # project_data["log"] = os.path.join(PROJECT_PATH, 'r2_gromacs.log')
         # project_data["config"] = os.path.join(PROJECT_PATH, 'r2_gromacs.config')
 
 
 
-        log_config = db_object.do_select("select log, config from projects where id = ?", (created_project_id, )).fetchone()
-        project_data["log"] = log_config[0]
-        project_data["config"] = log_config[1]
-
-
-
-        fh_log = open(project_data["log"], 'w', 0755)
-        fh_config = open(project_data["config"], 'w', 0755)
-
-        if created_project_id: # if created into db
-            from random import randint
-            project_create_details = project_data # json.loads(project_data)
-            project_create_details['project_id'] = randint(1,1000)
-            fh_log.write("# RSQUARELABS-CORE v%s \n# Written by Ravi RT Merugu \n# https://github.com/rsquarelabs/rsquarelabs-core\n\n\n"%__VERSION__)
-
-            mesg = """============================================
-Project created with id '%s',
-============================================""" % created_project_id
-            # fh_config.write(cur.lastrowid)
-            cprint(mesg, "green")
-        else:
-            os.remove(project_data["log"])
-            os.remove(project_data["config"])
-            os.rmdir(PROJECT_PATH)
-            mesg =  "ERROR \n%s " %project_data['title']
-            cprint(mesg, 'red')
+#         log_config = db_object.do_select("select log, config from projects where id = ?", (created_project_id, )).fetchone()
+#         project_data["log"] = log_config[0]
+#         project_data["config"] = log_config[1]
+#
+#
+#
+#         fh_log = open(project_data["log"], 'w', 0755)
+#         fh_config = open(project_data["config"], 'w', 0755)
+#
+#         if created_project_id: # if created into db
+#             from random import randint
+#             project_create_details = project_data # json.loads(project_data)
+#             project_create_details['project_id'] = randint(1,1000)
+#             fh_log.write("# RSQUARELABS-CORE v%s \n# Written by Ravi RT Merugu \n# https://github.com/rsquarelabs/rsquarelabs-core\n\n\n"%__VERSION__)
+#
+#             mesg = """============================================
+# Project created with id '%s',
+# ============================================""" % created_project_id
+#             # fh_config.write(cur.lastrowid)
+#             cprint(mesg, "green")
+#         else:
+#             os.remove(project_data["log"])
+#             os.remove(project_data["config"])
+#             os.rmdir(PROJECT_PATH)
+#             mesg =  "ERROR \n%s " %project_data['title']
+#             cprint(mesg, 'red')
 
 
 
