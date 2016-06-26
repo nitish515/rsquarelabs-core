@@ -32,3 +32,5 @@ site/
 rsquarelabs_core.egg-info/
 lastfailed
 coverage.xml
+
+.coverage
