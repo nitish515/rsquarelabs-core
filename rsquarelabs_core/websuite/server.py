@@ -17,6 +17,7 @@ JS_DIR      = os.path.join(STATIC_DIR, 'js')
 
 from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
+from rsquarelabs_core.engines.projects import Project
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH,\
     RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
 
@@ -77,6 +78,7 @@ obj.write_prod_mdp()
 
 
 db_object = DBEngine(RSQ_DB_PATH)
+
 
 app = Bottle()
 
@@ -206,25 +208,27 @@ def automator_insert():
     # protocol_data = re.escape(protocol_data)
 
 
-    db_object.do_insert(" INSERT INTO runs (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, class_name)\
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, protocol_class_name, ))
-
-    run_id = db_object.cur.lastrowid
+    # db_object.do_insert(" INSERT INTO runs (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, class_name)\
+    #                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (run_name, version, parent_run_id, master_id, run_data, is_delete, project_id, protocol_class_name, ))
+    #
+    # run_id = db_object.cur.lastrowid
+    save_run_obj = Project()
+    run_id = save_run_obj.save_run(run_name=run_name, version=version, run_data=run_data,
+                              parent_run_id=parent_run_id, master_id=master_id,is_delete=is_delete,
+                              protocol_class_name=protocol_class_name, project_id=project_id)
 
     project_path = db_object.do_select("select path from projects where id=?", (project_id,)).fetchone()[0]
     working_dir = os.path.join(project_path, "%s_%s" % (run_id, version))
     os.mkdir(working_dir, 0755)
 
-    db_object.conn.execute("UPDATE runs SET w_dir = ? WHERE run_id =?",
+    db_object.do_update("UPDATE runs SET w_dir = ? WHERE run_id =?",
                            (working_dir, run_id,))
-    db_object.conn.commit()
 
     file_name = os.path.join(RSQ_SCRIPT_PATH, "%s_%s_%s" % (run_id, version, time()))
     py_file_name = "%s.py" %file_name
     log_file_name = "%s.log" % file_name
 
-    db_object.conn.execute("UPDATE runs SET python_file = ?, log_file = ? WHERE run_id =?", (py_file_name, log_file_name, run_id, ))
-    db_object.conn.commit()
+    db_object.do_update("UPDATE runs SET python_file = ?, log_file = ? WHERE run_id =?", (py_file_name, log_file_name, run_id, ))
 
     run_header = execute_template.replace('RSQ_DB_LOG', log_file_name).replace('CLASS_NAME', protocol_class_name).\
         replace('WORKING_DIR', working_dir).replace('PROJECT_ID', project_id).replace('RECEPTOR_FILE', receptor_file).\
@@ -440,8 +444,8 @@ def projects_list():
         subprocess.Popen(['cp', '-r', PROJECT_ORIGIN_PATH, RSQ_BACKUP_PATH], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         redirect('/websuite/projects.html')
     elif delete_id != None:
-        db_object.conn.execute("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
-        db_object.conn.commit()
+
+        db_object.do_update("UPDATE projects SET is_delete = 1 WHERE id=?", (delete_id, ))
         redirect('/websuite/projects.html')
     elif export_id !=None:
         yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s.yaml" % (export_id))
@@ -489,7 +493,7 @@ def projects_list():
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
             "runs": runs_data
@@ -564,7 +568,7 @@ def export_yaml(project_id):
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
             "runs": runs_data
@@ -607,9 +611,29 @@ def import_project():
 
     with open(import_file, 'r') as file_handler:
         data = load(file_handler)
-    slug = "%s_%s"%(data['title'], time())
-    db_object.do_insert("INSERT INTO PROJECTS (title, tags, user_email, short_note, slug, date, is_delete)\
-        VALUES (?, ?, ?, ?, ?, ?, ?) ", (data['title'], data['tags'], data['user_email'], data['short_note'], slug, datetime.now().strftime("%Y-%m-%d %H:%M"), 0))
+    # slug = "%s_%s"%(data['title'], time())
+    # db_object.do_insert("INSERT INTO PROJECTS (title, tags, user_email, short_note, slug, date, is_delete)\
+    #     VALUES (?, ?, ?, ?, ?, ?, ?) ", (data['title'], data['tags'], data['user_email'], data['short_note'], slug, datetime.now().strftime("%Y-%m-%d %H:%M"), 0))
+
+    save_project = Project(project_title=data['title'], project_tags=data['tags'],
+                           project_user_email=data['user_email'], project_short_note=data['short_note'])
+
+    project_id = save_project.save()
+
+    for run in data['runs']:
+        import_run = data['runs'][run]
+        import_file = data['runs'][run]['files']
+        file_name, file_content = import_file[0].items()[0]
+        import_steps = data['runs'][run]['steps']
+        run_data = ''
+        for step in import_steps:
+            # print step
+            step_no, step_data = step.items()[0]
+            run_data = run_data + step[step_no] + '\n'
+        run_id = save_project.save_run(run_name=import_run['run_name'], protocol_class_name=import_run['class_name']
+                                       , run_data=run_data, project_id=project_id)
+        db_object.do_insert("INSERT INTO project_files (file_name, file_content, project_id, run_id)\
+                        VALUES(?, ?, ?, ?)", (file_name, file_content, project_id, run_id))
 
     redirect('/websuite/import.html')
 
@@ -697,7 +721,7 @@ def projects_view(project_id):
 
         data = {
             "title": str(export_project_data[0]),
-            "tag": str(export_project_data[1]),
+            "tags": str(export_project_data[1]),
             "user_email": str(export_project_data[2]),
             "short_note": str(export_project_data[3]),
         }
