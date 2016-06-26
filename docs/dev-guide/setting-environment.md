@@ -1,12 +1,12 @@
-# Setup Doc for Developers
+# Development Env Setup
 
 
-This is the first time setup doc for the developer.
+This is the first time setup doc for the developers.
 
 ## First time installation 
 
-```
-git clone https://github.com/rsquarelabs/rsquarelabs-core
+```bash
+git clone https://github.com/rsquarelabs/framework
 virtualenv venv
 source venv/bin/activate
 pip2.7 install -r requirements.txt
@@ -32,19 +32,17 @@ In Fedora/CentOS `sudo yum install gromacs`
 
 
 
-## Accessing the command from anyhere 
+## Accessing the command
 
 Once this package is installed via `pip install rsquarelabs-core` , all the python scripts in sbin are supposed to be accessbile from anywhere, 
 but to simulate that behaviour in the development, we can create alias for these commands in `.bashrc` or add a softlink, here is how to
-add these commands in `.bashrc`
-
-`gedit ~/.bashrc`
+add these commands in `.bashrc` ie., `gedit ~/.bashrc`
 
 add the following lines 
 
-```
-alias r2_gromacs='python /home/<USERNAME>/<RSQUARELABS-CORE-PATH>/sbin/r2_gromacs.py'
-alias r2_server_start='python /home/<USERNAME>/<RSQUARELABS-CORE-PATH>/sbin/r2_server_start.py'
+```bash
+alias r2_gromacs='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_gromacs.py'
+alias r2_server_start='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_server_start.py'
 ```
 
 restart the terminal or do `source ~/.bashrc` to enable these commands for first time

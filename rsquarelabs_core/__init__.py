@@ -1,5 +1,19 @@
 __author__ = 'rrmerugu'
 
+
+__title__ = 'R2-Core Framework'
+__version__ = '0.0.1'
+__author__ = 'Ravi RT Merugu'
+__license__ = 'Apache License, Version 2.0'
+__copyright__ = 'Copyright 2012-2016 www.rsquarelabs.com'
+
+# Version synonym
+VERSION = __version__
+
+
+
+
+
 import os, sys, subprocess, pip, platform
 from .config import RSQ_PROJECTS_HOME, RSQ_HOME, RSQ_DB_PATH, RSQ_PROJECTS_CONFIG, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
 

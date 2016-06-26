@@ -27,3 +27,10 @@ venv/
 playground/
 
 
+site/
+.tox/
+rsquarelabs_core.egg-info/
+lastfailed
+coverage.xml
+
+.coverage

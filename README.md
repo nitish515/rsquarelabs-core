@@ -1,17 +1,18 @@
 # framework
 
-[![Build Status](https://travis-ci.org/rsquarelabs/framework.svg?branch=dev)](https://travis-ci.org/rsquarelabs/framework)
-[![Requirements Status](https://requires.io/github/rsquarelabs/framework/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/framework/requirements/?branch=dev)
+[![Build Status](https://travis-ci.org/rsquarelabs/rsquarelabs-core.svg?branch=dev)](https://travis-ci.org/rsquarelabs/rsquarelabs-core)
+[![Requirements Status](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements/?branch=dev)
+[![codecov](https://codecov.io/gh/rsquarelabs/rsquarelabs-core/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/rsquarelabs-core)
 
-![framework hero ](_docs/images/rsquarelabs-hero.jpg)
+![framework hero ](docs/images/rsquarelabs-hero.jpg)
 
 This is the library of automation pipeline modules
 
 [Website](http://rsquarelabs.org) |
-[Documentation](https://github.com/rsquarelabs/framework/wiki/) |
-[Installation](https://github.com/rsquarelabs/framework/wiki#installation) |
-[Mailing List](https://groups.google.com/d/forum/framework) |
-[Gitter Chat](https://gitter.im/rsquarelabs/framework)
+[Documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki/) |
+[Installation](https://github.com/rsquarelabs/rsquarelabs-core/wiki#installation) |
+[Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
+[Gitter Chat](https://gitter.im/rsquarelabs/rsquarelabs-core)
 
 
 ## Summary
@@ -75,15 +76,15 @@ Don't know what you want to help out with? Well here are some areas that we coul
 
 - framework scientific thoughts,
 - framework [technical stack](_docs/notes/technical-stack.md)
-- framework code - see [milestones](https://github.com/rsquarelabs/framework/milestones) and [issues](https://github.com/rsquarelabs/framework/issues) for more
-- framework [documentation](https://github.com/rsquarelabs/framework/wiki), [tutorials](https://github.com/rsquarelabs/framework/wiki/Tutorials) and [examples](https://github.com/rsquarelabs/framework/wiki/Examples)
+- framework code - see [milestones](https://github.com/rsquarelabs/rsquarelabs-core/milestones) and [issues](https://github.com/rsquarelabs/rsquarelabs-core/issues) for more
+- framework [documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki), [tutorials](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Tutorials) and [examples](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Examples)
 - framework [website](http://rsquarelabs.org)
 - If you want to join our community as a contributor, please leave a message as [@rrmerugu](https://twitter.com/rrmerugu)
 
 
 
 ## RoadMap
-You can find a detailed Roadmap of framework [here](https://github.com/rsquarelabs/framework/milestones).
+You can find a detailed Roadmap of framework [here](https://github.com/rsquarelabs/rsquarelabs-core/milestones).
 
 ## Support
 We support universties and research labs to install, configure and setup rl-core
