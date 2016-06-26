@@ -82,8 +82,6 @@ prior to any public disclosure.
 
 ## License
 
-# Licensing
-
 Copyright 2016 Ravi Raja Tejasvi Merugu
 
 Licensed under the Apache License, Version 2.0 (the "License");
