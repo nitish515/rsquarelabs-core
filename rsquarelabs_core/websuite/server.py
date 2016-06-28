@@ -651,7 +651,7 @@ def projects_view(project_id):
     """
     now = datetime.now().strftime(footer_timeformat)
 
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id, )).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date, description from projects where id = ?", (project_id, )).fetchone()
     #TODO = filter by project_id
     project_activity_data = db_object.do_select(
             "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,)).fetchall()
@@ -685,6 +685,11 @@ def projects_view(project_id):
     if "run_id=" in qs_string:
         run_id = qs_string.split('run_id=')[1].split('&')[0]
         print run_id
+
+    edit = False
+    if "edit=" in qs_string:
+        if  int(qs_string.split('edit=')[1].split('&')[0]) == 1:
+            edit = True
 
     if run_id !=None:
         yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s_%s.yaml" % (project_id, run_id))
@@ -736,8 +741,37 @@ def projects_view(project_id):
 
         redirect('/websuite/download/export_%s_%s.yaml' % (project_id, run_id))
 
+    project_updated_message = request.get_cookie('project_updated_message')
+    response.delete_cookie('project_updated_message')
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    return template(content, run_notes_list=run_notes_list, project_log=project_log, project_activity_data= project_activity_data[:5], project_config=project_config, project_data=project_data,runs_list=runs_list, now=now)
+    return template(content, run_notes_list=run_notes_list,
+                    project_log=project_log,
+                    project_activity_data= project_activity_data[:5],
+                    project_config=project_config, project_data=project_data,
+                    runs_list=runs_list, edit=edit,project_updated_message=project_updated_message, now=now)
+
+
+@app.route('/websuite/project/:project_id', method='POST')
+def projects_view_edit(project_id):
+
+
+    description = request.forms.get('description')
+    short_note = request.forms.get('short_note')
+    """
+    description and short_note are different forms, so we have to update them seperately
+    """
+
+    if description == '==':
+        " Now ignore description"
+        print "=update short note"
+        db_object.do_update("UPDATE projects SET short_note = ? WHERE id =?",
+                        (short_note, project_id))
+    if short_note == '==':
+        db_object.do_update("UPDATE projects SET description = ? WHERE id =?",
+                            (description, project_id))
+    response.set_cookie('project_updated_message', 'Project info updated Successfully')
+
+    redirect('/websuite/project/%s' %(project_id))
 
 
 @app.route('/websuite/runs/:run_id')

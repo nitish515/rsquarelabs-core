@@ -10,7 +10,8 @@ CREATE TABLE projects
        log            TEXT,
        type           TEXT,
        date           TEXT,
-       is_delete      INT);
+       is_delete      INT,
+       description TEXT);
 CREATE TABLE project_activity
     ( id  INTEGER PRIMARY KEY     AUTOINCREMENT,
     tool_name TEXT NOT NULL,
