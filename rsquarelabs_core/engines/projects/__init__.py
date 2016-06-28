@@ -144,7 +144,7 @@ class Project(object):
 
         slug = self.project_title.replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-')\
-                .replace(":","-").replace("--","-")
+                .replace(":","-").replace("--","-").lower()
 
 
         # if check db if exist:
