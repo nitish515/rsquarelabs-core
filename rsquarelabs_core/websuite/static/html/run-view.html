@@ -3,41 +3,101 @@
 <head>
     <meta charset="UTF-8">
 
-        <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-        <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="http://fontawesome.io/assets/font-awesome/css/font-awesome.css">
 
     <title>RMV | RSQUARE LABS Automator </title>
 </head>
 <body>
 % include('header.html')
 <div class="container pageview">
-    <div class="row">
+    <div class="row" style="margin-top:20px">
         <div class="col-md-4">
-            <h4>Run Files :</h4>
-            <ol>
-                %for file in file_list:
-                    <li><a href="/websuite/runs/{{run_id}}?download_file={{file}}">{{file}}</a> </li>
-                %end
-            </ol>
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Files
+                </div>
+                <div class="panel-body">
+                    <ul class="list-unstyled">
+                        %for file in file_list:
+                        <li style="border-bottom:1px solid #eee; padding:5px 10px;"><a
+                                href="/websuite/runs/{{run_id}}?download_file={{file}}">{{file}}</a></li>
+                        %end
+                    </ul>
+                </div>
+            </div>
+
+
         </div>
         <div class="col-md-8">
-            <h4>Run Activity <small><a href="/websuite/runs/{{run_id}}/activity">see all</a></small>  </h4>
-            <ul>
-                % for activity in run_activity_data:
-                <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong> {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}, <strong>PID:</strong> {{activity[5]}}
-                    <br>
-                    <pre>{{activity[4]}}</pre></li>
-                % end
-            </ul>
+           <div class="panel panel-default">
+                <div class="panel-heading">
+                    Run Description
+                </div>
+                <div class="panel-body">
+                    <form role="form" method="post">
+                        <textarea class="form-control" rows="3" name="run_info" id="run_info"></textarea>
+                        <div class="pull-right">
+                             <button type="cancel" class="btn btn-default pull-right">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                            </button>
+                            <button type="submit" class="btn btn-primary pull-right">
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <p class="small text-muted">You can write the simple note on implementation.</p>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Create Notes
+                </div>
+                <div class="panel-body">
+                    <form role="form" method="post">
+                        <textarea class="form-control" rows="6" name="run_notes" id="notes"></textarea>
+                        <button type="submit" class="btn btn-primary pull-right"><strong>Submit</strong></button>
+                    </form>
+                    <div class="clearfix"></div>
+                    % if note_insert_message :
+                        <p style="color:green">{{note_insert_message}}</p>
+                    % end
+                </div>
+            </div>
+
+
+            <div class="clearfix"></div>
+            <hr>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Run Activity
+                    <small class="pull-right"><a href="/websuite/runs/{{run_id}}/activity">see all</a></small>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-unstyled">
+                        % for activity in run_activity_data:
+                        <li>{{activity[0]}}. <strong>Tool:</strong> {{activity[1]}}, <strong>StepNo:</strong>
+                            {{activity[2]}}, <strong>StepName:</strong> {{activity[3]}}, <strong>PID:</strong>
+                            {{activity[5]}}
+                            <br>
+                            <pre>{{activity[4]}}</pre>
+                        </li>
+                        % end
+                    </ul>
+                </div>
+            </div>
+
+
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <form role="form" method="post">
-                <label for="notes">Notes :</label>
-                <textarea class="form-control" rows="10" name="run_notes" id="notes"></textarea>
-                <button type="submit" class="btn btn-success btn-lg"><strong>Submit</strong></button>
-            </form>
+
         </div>
     </div>
 </div>
