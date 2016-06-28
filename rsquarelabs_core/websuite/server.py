@@ -128,6 +128,7 @@ def automator():
         protocol_initial_data = db_object.do_select("SELECT protocol_name, protocol_data from protocols WHERE protocol_id =?",
                                                     (master_id,)).fetchone()
     new_version = db_object.do_select("SELECT MAX(version) from runs WHERE parent_run_id=?", (run_id, )).fetchone()[0]
+
     print new_version
     print type(new_version)
 
@@ -184,6 +185,8 @@ def automator_insert():
     project_id = request.forms.get("project_id")
     protocol_class_name = request.forms.get("protocol_class")
     receptor_file = request.forms.get("receptor_file")
+    print "-=-=-=-=-="
+    print version
 
     qs_string = request.query_string
     run_id = None
