@@ -35,23 +35,18 @@
                     <h1>{{project_data[2]}}
                         <small>{{project_data[1]}}</small>
                     </h1>
-                    <!--<p>{{project_data[3]}}</p>-->
+
                     % if edit :
                     <form role="form" method="post">
-
-
-                        <div class="row">
+                       <div class="row">
                             <div class="col-md-10">
-
                                 <input class="form-control" rows="3" name="short_note" id="short_note"
                                        value="{{project_data[3]}}"/>
                                 <input type="hidden" name="description" value="==">
                                 <p class="small text-muted">You can write the simple note that describes this
                                     project.</p>
-
                             </div>
                             <div class="col-md-2">
-
                                 <button type="cancel" class="btn btn-default pull-right">
                                     <i class="fa fa-times" aria-hidden="true"></i>
                                 </button>
@@ -61,18 +56,13 @@
 
                             </div>
                         </div>
-
-
                     </form>
                     % else:
                     <p>{{project_data[3]}}</p>
                     % end
                 </div>
-
-
             </div>
         </div>
-
     </section>
 
     <div class="container">

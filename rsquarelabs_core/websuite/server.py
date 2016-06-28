@@ -328,7 +328,6 @@ def protocols_new():
 
     content = open(os.path.join(HTML_DIR, 'new.html')).read()
     protocol_created = request.get_cookie('protocol_created')
-    print protocol_created
     response.delete_cookie('protocol_created')
     return template(content, now=now, protocol_created= protocol_created)
 
@@ -777,12 +776,13 @@ def run_veiw(run_id):
     :return:
     """
     now = datetime.now().strftime(footer_timeformat)
-    data = db_object.do_select("select w_dir, run_description from runs where run_id=?", (run_id, )).fetchone()
+    data = db_object.do_select("select w_dir, run_description, project_id from runs where run_id=?", (run_id, )).fetchone()
 
     run_dir  = data[0]
     run_description=data[1]
+    project_id =  data[2]
 
-
+    project_data = db_object.do_select("select id, title from projects where id= ?", (project_id,)).fetchone()
 
     file_list = os.listdir(run_dir)
     file_list_filter = []
@@ -821,7 +821,8 @@ def run_veiw(run_id):
                     run_activity_data=run_activity_data[:5],
                     run_description= run_description,
                     now=now,
-                    edit= edit)
+                    edit= edit,
+                    project_data=project_data)
 
 
 

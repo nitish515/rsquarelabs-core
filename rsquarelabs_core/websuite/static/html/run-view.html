@@ -11,6 +11,27 @@
 </head>
 <body>
 % include('header.html')
+
+    <section class="project-header" style="height:auto">
+        <div class="container">
+            <div class="row">
+
+
+                <div class="col-md-12 breadcrumb-col">
+                    <!--<h1 class="text-center">WebSuite Index</h1>-->
+                    <ol class="breadcrumb">
+                        <li><a href="/websuite/index.html">Websuite</a></li>
+                        <li><a href="/websuite/project/{{project_data[0]}}">{{project_data[1]}}</a></li>
+                        
+
+                    </ol>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
 <div class="container pageview">
     <div class="row" style="margin-top:20px">
         <div class="col-md-4">
@@ -64,21 +85,6 @@
                 </div>
             </div>
 
-            <!--<div class="panel panel-default">-->
-                <!--<div class="panel-heading">-->
-                    <!--Create Notes-->
-                <!--</div>-->
-                <!--<div class="panel-body">-->
-                    <!--<form role="form" method="post">-->
-                        <!--<textarea class="form-control" rows="6" name="run_notes" id="notes"></textarea>-->
-                        <!--<button type="submit" class="btn btn-primary pull-right"><strong>Submit</strong></button>-->
-                    <!--</form>-->
-                    <!--<div class="clearfix"></div>-->
-                    <!--% if note_insert_message :-->
-                        <!--<p style="color:green">{{note_insert_message}}</p>-->
-                    <!--% end-->
-                <!--</div>-->
-            <!--</div>-->
 
 
             <div class="clearfix"></div>
