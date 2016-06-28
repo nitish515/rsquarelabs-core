@@ -311,21 +311,11 @@ def protocols():
     """
     now = datetime.now().strftime(footer_timeformat)
 
-    # qs_string = request.query_string
-    # protocol_id = None
-    #
-    # if "protocol_id=" in qs_string:
-    #     protocol_id = qs_string.split('protocol_id=')[1].split('&')[0]
-    #
-    #
-    # if protocol_id != None:
-    #     db_object.conn.execute("UPDATE runs SET is_delete = 1 WHERE id= ?", (protocol_id,))
-    #     db_object.conn.commit()
-
     protocol_list = db_object.do_select("select protocol_id, protocol_name, author, class, description, date from protocols", ()).fetchall()
 
+    protocol_created = request.get_cookie('protocol_created')
     content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
-    return template(content,protocol_list=protocol_list,now=now)
+    return template(content,protocol_list=protocol_list,now=now, protocol_created= protocol_created)
 
 
 @app.route('/websuite/protocols/new.html')
@@ -337,7 +327,10 @@ def protocols_new():
     now = datetime.now().strftime(footer_timeformat)
 
     content = open(os.path.join(HTML_DIR, 'new.html')).read()
-    return template(content, now=now)
+    protocol_created = request.get_cookie('protocol_created')
+    print protocol_created
+    response.delete_cookie('protocol_created')
+    return template(content, now=now, protocol_created= protocol_created)
 
 
 @app.route('/websuite/protocols/new.html', method='POST')
@@ -355,6 +348,8 @@ def protocols_new():
 
     db_object.do_insert("insert into protocols (protocol_name, class, protocol_data, description, author, date)\
      values (?, ?, ?, ?, ?, ?)", (name, "ProteinMin", data, description, author, datetime.now().strftime("%Y-%m-%d %H:%M"), ))
+
+    response.set_cookie('protocol_created', 'Protocol created Successfully')
 
     redirect('/websuite/protocols/new.html')
 
@@ -818,7 +813,7 @@ def run_veiw(run_id):
 
     content = open(os.path.join(HTML_DIR, 'run-view.html')).read()
 
-    note_insert_message = request.get_cookie('note_insert_message',None)
+    note_insert_message = request.get_cookie('note_insert_message')
     response.delete_cookie('note_insert_message')
     return template(content, file_list=file_list_filter,
                     run_id=run_id,

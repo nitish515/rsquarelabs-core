@@ -40,6 +40,10 @@
             <button type="submit" class="btn btn-success btn-lg"><strong>Save</strong></button>
 
         </form>
+        <div class="clearfix"></div>
+        % if protocol_created:
+            <p style="color:green">{{protocol_created}}</p>
+        % end
     </div>
 % include('footer.html', now=now)
 </body>
