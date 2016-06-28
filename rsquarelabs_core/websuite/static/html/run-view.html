@@ -36,10 +36,18 @@
            <div class="panel panel-default">
                 <div class="panel-heading">
                     Run Description
+
+                    % if not edit :
+                         <small class="pull-right"><a href="?edit=1">Edit</a></small>
+                    % end
                 </div>
                 <div class="panel-body">
+
+
+                    % if edit :
                     <form role="form" method="post">
-                        <textarea class="form-control" rows="3" name="run_info" id="run_info"></textarea>
+                        <textarea class="form-control" rows="3" name="run_description" id="run_description">{{run_description}}
+                        </textarea>
                         <div class="pull-right">
                              <button type="cancel" class="btn btn-default pull-right">
                                 <i class="fa fa-times" aria-hidden="true"></i>
@@ -50,6 +58,10 @@
                         </div>
                     </form>
                     <p class="small text-muted">You can write the simple note on implementation.</p>
+                    % else:
+                    <p>{{run_description}}</p>
+
+                    % end
                 </div>
             </div>
 

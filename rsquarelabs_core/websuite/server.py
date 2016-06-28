@@ -748,7 +748,12 @@ def run_veiw(run_id):
     :return:
     """
     now = datetime.now().strftime(footer_timeformat)
-    run_dir = db_object.do_select("select w_dir from runs where run_id=?", (run_id, )).fetchone()[0]
+    data = db_object.do_select("select w_dir, run_description from runs where run_id=?", (run_id, )).fetchone()
+
+    run_dir  = data[0]
+    run_description=data[1]
+
+
 
     file_list = os.listdir(run_dir)
     file_list_filter = []
@@ -762,6 +767,13 @@ def run_veiw(run_id):
     if "download_file=" in qs_string:
         download_file = qs_string.split('download_file=')[1].split('&')[0]
 
+    edit = False
+    if "edit" in qs_string:
+
+        if int(qs_string.split('edit=')[1].split('&')[0]) == 1:
+            edit = True
+
+    print edit
 
     if download_file != None:
         return static_file(download_file, root='%s' %(run_dir), download=download_file)
@@ -778,7 +790,9 @@ def run_veiw(run_id):
                     run_id=run_id,
                     note_insert_message = note_insert_message,
                     run_activity_data=run_activity_data[:5],
-                    now=now)
+                    run_description= run_description,
+                    now=now,
+                    edit= edit)
 
 
 
@@ -789,9 +803,11 @@ def run_veiw_notes(run_id):
     :param run_id: identification number of a run
     :return:
     """
-    run_notes = request.forms.get('run_notes')
-    db_object.do_insert("INSERT INTO notes (note, run_id) values (?, ?)", (run_notes, run_id, ))
-    response.set_cookie('note_insert_message', 'Notes Created Successfully')
+    run_description = request.forms.get('run_description')
+    print run_description
+    db_object.do_update("UPDATE runs SET run_description = ? WHERE run_id =?",
+                        (run_description, run_id,))
+    response.set_cookie('note_insert_message', 'Run description updated Successfully')
 
     redirect('/websuite/runs/%s' %(run_id))
 
