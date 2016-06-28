@@ -141,8 +141,10 @@ class Project(object):
         return path
 
     def generate_slug(self):
+        print "=-=-===============generaring slug"
+        print self.project_title
 
-        slug = self.project_title.replace(" ","-").replace("_","-")\
+        slug = self.project_title.rstrip().replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-')\
                 .replace(":","-").replace("--","-").lower()
 
