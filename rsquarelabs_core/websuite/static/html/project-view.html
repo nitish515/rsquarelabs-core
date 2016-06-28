@@ -58,9 +58,16 @@
 
         <div class="row">
             <div class="col-md-7">
-                <h4>Recent Notes: </h4>
 
-                <table class="table table-striped table-bordered table-hover">
+                <div class="panel panel-default">
+
+                    <div class="panel-heading">
+                        Runs:
+                    </div>
+
+                    <div class="panel-body" style="padding:0">
+
+                            <table class="table table-striped  table-hover">
                     <thead>
                     <tr>
                         <th>Run ID</th>
@@ -86,14 +93,29 @@
                     %end
                     </tbody>
                 </table>
+
+
+
+                    </div>
+
+
+                </div>
+
+
+
+
+
             </div>
             <div class="col-md-5">
                 <h4>Protocols: </h4>
-                % for note in run_notes_list :
-                <a href=""><strong>Run-{{note[0]}}</strong> : {{note[1][:120]}}</a>
-                <hr>
+                <ul class="list-unstyled">
+                     % for note in run_notes_list :
+                    <li style="margin:10px 0 10px 0; border-bottom: 1px solid #eee; height: 3.2em; overflow:hidden;">
+                        <a href=""><strong>Run-{{note[0]}}</strong> : {{note[1] }}</a>
+                    </li>
+                    % end
+                </ul>
 
-                % end
             </div>
         </div>
 

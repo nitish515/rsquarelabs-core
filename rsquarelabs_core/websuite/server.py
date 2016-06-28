@@ -4,7 +4,7 @@ import os, sys, subprocess
 from datetime import datetime
 from time import time
 import bottle as bottle2
-from bottle import Bottle, request, static_file, template, redirect, error
+from bottle import Bottle, request, static_file, template, redirect, error, response
 from yaml import dump, load
 
 
@@ -745,7 +745,6 @@ def run_veiw(run_id):
     :return:
     """
     now = datetime.now().strftime(footer_timeformat)
-    print run_id
     run_dir = db_object.do_select("select w_dir from runs where run_id=?", (run_id, )).fetchone()[0]
 
     file_list = os.listdir(run_dir)
@@ -759,7 +758,7 @@ def run_veiw(run_id):
 
     if "download_file=" in qs_string:
         download_file = qs_string.split('download_file=')[1].split('&')[0]
-        print download_file
+
 
     if download_file != None:
         return static_file(download_file, root='%s' %(run_dir), download=download_file)
@@ -769,8 +768,12 @@ def run_veiw(run_id):
         (run_id,)).fetchall()
 
     content = open(os.path.join(HTML_DIR, 'run-view.html')).read()
+
+    note_insert_message = request.get_cookie('note_insert_message',None)
+    response.delete_cookie('note_insert_message')
     return template(content, file_list=file_list_filter,
                     run_id=run_id,
+                    note_insert_message = note_insert_message,
                     run_activity_data=run_activity_data[:5],
                     now=now)
 
@@ -785,6 +788,8 @@ def run_veiw_notes(run_id):
     """
     run_notes = request.forms.get('run_notes')
     db_object.do_insert("INSERT INTO notes (note, run_id) values (?, ?)", (run_notes, run_id, ))
+    response.set_cookie('note_insert_message', 'Notes Created Successfully')
+
     redirect('/websuite/runs/%s' %(run_id))
 
 # @app.route('/websuite/runs/:run_id')
