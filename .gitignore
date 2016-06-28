@@ -34,3 +34,5 @@ lastfailed
 coverage.xml
 
 .coverage
+#temp*
+*.1#

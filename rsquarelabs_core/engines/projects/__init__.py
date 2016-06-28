@@ -26,7 +26,7 @@ class Project(object):
 
 
     def save(self, *args, **kwargs):
-        print "----->1"
+
         # check if the project-key exist in db,
         # check if the project-key exist in rsquareProjects
         project_path = self.generate_path(slug=self.project_slug)
@@ -86,7 +86,7 @@ class Project(object):
         return project_id
 
     def create_log(self, project_log=None, project_data=None, project_id=None):
-        print "----->4"
+
         fh_log = open(project_log, 'w', 0755)
         from random import randint
         project_create_details = project_data  # json.loads(project_data)
@@ -101,7 +101,7 @@ class Project(object):
         cprint(mesg, "green")
 
     def create_config(self, project_config=None):
-        print "------>5"
+
         fh_config = open(project_config, 'w', 0755)
 
 
@@ -126,7 +126,6 @@ class Project(object):
 
 
     def generate_path(self, slug=None):
-        print "------>2"
         if slug == None:
             slug = self.generate_slug()
 
@@ -142,7 +141,6 @@ class Project(object):
         return path
 
     def generate_slug(self):
-        print "----->3"
 
         slug = self.project_title.replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-')\

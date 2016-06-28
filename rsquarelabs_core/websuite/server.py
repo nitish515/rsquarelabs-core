@@ -19,7 +19,7 @@ from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
 from rsquarelabs_core.engines.projects import Project
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH,\
-    RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
+    RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH, USER_HOME_FOLDER
 
 
 
@@ -44,7 +44,7 @@ logger.addHandler(handler)
 
 
 
-CORE_DIR = "/home/nitish/PycharmProjects/rsquarelabs-core"
+CORE_DIR = '"""+USER_HOME_FOLDER + """/PycharmProjects/rsquarelabs-core'
 # Path appended of rsquarelabs_core to sys for accessing modules inside rsquarelabs_core
 sys.path.append(CORE_DIR)
 
