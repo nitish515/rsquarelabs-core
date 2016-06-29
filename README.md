@@ -11,6 +11,15 @@ This is the core engine of automation pipeline and research tracking modules.
 
 
 
+
+
+[Website](http://rsquarelabs.com) | [Documentation](https://developers.rsquarelabs.com/core-client/) | [Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
+
+----
+
+[**Install**](#install) |  [**Features**](#features) | [**Community**](#community) |  [**Support**](#support)
+
+
 ![Homepage](docs/_images/demo/homepage.png)
 
 ![Project View](docs/_images/demo/project-view.png)
@@ -18,19 +27,6 @@ This is the core engine of automation pipeline and research tracking modules.
 ![Project Run View ](docs/_images/demo/run.png)
 
 
-[Website](http://rsquarelabs.com) |
-[Documentation](https://developers.rsquarelabs.com/core-client/) |
-[Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
-
-
-
-## Summary
-- [**Install**](#install)
-- [**Features**](#features)
-- [**Community**](#community)
-- [**Roadmap**](#roadmap)
-- [**Support**](#support)
-- [**License**](#license)
 
 
 ## Install
