@@ -3,8 +3,9 @@
 [![Build Status](https://travis-ci.org/rsquarelabs/rsquarelabs-core.svg?branch=dev)](https://travis-ci.org/rsquarelabs/rsquarelabs-core)
 [![Requirements Status](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements/?branch=dev)
 [![codecov](https://codecov.io/gh/rsquarelabs/rsquarelabs-core/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/rsquarelabs-core)
+[![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-![framework hero ](docs/images/rsquarelabs-hero.jpg)
+![framework hero ](docs/_images/rsquarelabs-hero.jpg)
 
 This is the library of automation pipeline modules
 
