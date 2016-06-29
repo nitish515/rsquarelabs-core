@@ -14,7 +14,8 @@ markdown_extensions:
 pages:
 - Home: index.md
 - User Guide:
-    - Quickstart : user-guide/tutorial/quickstart.md
+    - Tutorials : user-guide/tutorial/index.md
+    - Use Cases : user-guide/usercases.md
 
 - Dev Guide:
     - Project : dev-guide/modules/project.md

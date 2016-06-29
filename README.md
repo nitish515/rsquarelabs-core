@@ -1,26 +1,23 @@
 # framework
 
-[![Build Status](https://travis-ci.org/rsquarelabs/rsquarelabs-core.svg?branch=dev)](https://travis-ci.org/rsquarelabs/rsquarelabs-core)
-[![Requirements Status](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/rsquarelabs-core/requirements/?branch=dev)
-[![codecov](https://codecov.io/gh/rsquarelabs/rsquarelabs-core/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/rsquarelabs-core)
+[![Build Status](https://travis-ci.org/rsquarelabs/core-client.svg?branch=dev)](https://travis-ci.org/rsquarelabs/core-client)
+[![Requirements Status](https://requires.io/github/rsquarelabs/core-client/requirements.svg?branch=dev)](https://requires.io/github/rsquarelabs/core-client/requirements/?branch=dev)
+[![codecov](https://codecov.io/gh/rsquarelabs/core-client/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/core-client)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 ![framework hero ](docs/_images/rsquarelabs-hero.jpg)
 
 This is the library of automation pipeline modules
 
-[Website](http://rsquarelabs.org) |
-[Documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki/) |
-[Installation](https://github.com/rsquarelabs/rsquarelabs-core/wiki#installation) |
+[Website](http://rsquarelabs.com) |
+[Documentation](https://developers.rsquarelabs.com/core-client/) |
 [Mailing List](https://groups.google.com/d/forum/rsquarelabs-core) |
-[Gitter Chat](https://gitter.im/rsquarelabs/rsquarelabs-core)
+
 
 
 ## Summary
 - [**Install**](#install)
 - [**Features**](#features)
-- [**Usage**](#usage)
-- [**Why framework?**](#why-framework)
 - [**Community**](#community)
 - [**Roadmap**](#roadmap)
 - [**Support**](#support)
@@ -29,45 +26,15 @@ This is the library of automation pipeline modules
 
 ## Install
 ```
-pip install framework
+pip install rsquarelabs-client
 ```
 **we currently support python 2.7 only**
 
-## Usage
-```
-# first: import the class that does protein-ligand minimisation
-from rsquarelabs_core.engines.gromacs import ProteinLigMin
-
-# Create and object with input files 
-obj = ProteinLigMin(
-    ligand_file='ligand.gro',
-    ligand_topology_file='ligand.itp',
-    protein_file='protein.pdb',
-    working_dir='./',
-    verbose=True,
-    quiet=False
-)
-
-# call the method you want to start with
-obj.create_topology()
-obj.prepare_system()
-obj.write_em_mdp()
-obj.add_ions()
-obj.write_emreal_mdp()
-obj.minimize()
-
  
-
-```
-
 ## Features
-1. Start a light weight webserver
-2. commands for /usr/local/bin/
-
-## Why framework
 1. scaffolding the project
 2. project management
-3. Tracking the project via webclient
+3. Tracking the project
 
 
 ## Community
@@ -75,19 +42,31 @@ Want to join an open source project? Now it's your chance!
 
 Don't know what you want to help out with? Well here are some areas that we could use help with:
 
-- framework scientific thoughts,
-- framework [technical stack](_docs/notes/technical-stack.md)
-- framework code - see [milestones](https://github.com/rsquarelabs/rsquarelabs-core/milestones) and [issues](https://github.com/rsquarelabs/rsquarelabs-core/issues) for more
-- framework [documentation](https://github.com/rsquarelabs/rsquarelabs-core/wiki), [tutorials](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Tutorials) and [examples](https://github.com/rsquarelabs/rsquarelabs-core/wiki/Examples)
-- framework [website](http://rsquarelabs.org)
+- scientific thoughts,
+- technical stack
+- coding - see [milestones](https://github.com/rsquarelabs/core-client/milestones) and [issues](https://github.com/rsquarelabs/core-client/issues) for more
+- [documentation](http://developers.rsquarelabs.com/core-client/), [tutorials](http://developers.rsquarelabs.com/core-client/user-guide/tutorial/)) and [Usecases](http://developers.rsquarelabs.com/core-client/user-guide/usercases/)
+- [website](http://developers.rsquarelabs.com)
 - If you want to join our community as a contributor, please leave a message as [@rrmerugu](https://twitter.com/rrmerugu)
 
 
-
-## RoadMap
-You can find a detailed Roadmap of framework [here](https://github.com/rsquarelabs/rsquarelabs-core/milestones).
-
+ 
 ## Support
-We support universties and research labs to install, configure and setup rl-core
+
+We support universities and research labs in setting up this client for automating and tracking their research .
 
 ## License
+
+Copyright 2016 Ravi Raja Tejasvi Merugu
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may 
+not use this file except in compliance with the License. You may obtain 
+a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+License for the specific language governing permissions and limitations 
+under the License.
