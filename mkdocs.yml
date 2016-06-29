@@ -1,8 +1,8 @@
-site_name: R2-CORE Framework
-site_url: http://docs.rsquarelabs.com/sdk/framework
-repo_url: https://github.com/rsquarelabs/framework
+site_name: R2-Core Client
+site_url: http://developers.rsquarelabs.com/core-client
+repo_url: https://github.com/rsquarelabs/core-client
 
-docs_url: http://rsquarelabs.github.io/framework
+docs_url: http://developers.rsquarelabs.com/core-client
 theme_dir : docs_theme
 docs_dir: docs
 use_directory_urls: true
@@ -28,5 +28,6 @@ pages:
     - Contributing : about/contributing.md
     - Project Management : about/project-management.md
     - Release Process : about/release-process.md
+
 copyright: Copyright &copy; 2016 <a href="https://twitter.com/rrmerugu">rsquarelabs.com</a>
 google_analytics: ['UA-71847416-1', 'docs.rsquarelabs.com']

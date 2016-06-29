@@ -6,10 +6,14 @@ This is the first time setup doc for the developers.
 ## First time installation 
 
 ```bash
-git clone https://github.com/rsquarelabs/framework
+git clone https://github.com/rsquarelabs/core-client
 virtualenv venv
 source venv/bin/activate
-pip2.7 install -r requirements.txt
+# Use pip2.7 not pip, because pip might be linked to pip3 in some versions
+pip2.7 install -r requirements/requirements.txt
+pip2.7 install -r requirements/dev-requirements.txt
+pip2.7 install -r requirements/testing-requirements.txt 
+
 ```
 
 Install Gromacs (www.gromacs.org)
@@ -41,12 +45,31 @@ add these commands in `.bashrc` ie., `gedit ~/.bashrc`
 add the following lines 
 
 ```bash
-alias r2_gromacs='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_gromacs.py'
-alias r2_server_start='python /home/<USERNAME>/<R2-CORE-framework-PATH>/sbin/r2_server_start.py'
+alias r2_gromacs='python2.7 /home/<USERNAME>/<R2-core-client-PATH>/sbin/r2_gromacs.py'
+alias r2_server_start='python2.7 /home/<USERNAME>/<R2-core-client-PATH>/sbin/r2_server_start.py'
 ```
 
-restart the terminal or do `source ~/.bashrc` to enable these commands for first time
+Example:
 
+```bash
+# In Mac
+alias r2_gromacs='python2.7 /Users/rrmerugu/PycharmProjects/rsquarelabs-core/sbin/r2_gromacs.py'
+alias r2_server_start='python2.7 /Users/rrmerugu/PycharmProjects/rsquarelabs-core/sbin/r2_server_start.py'
+
+# In Linux
+alias r2_gromacs='python2.7 /home/rrmerugu/PycharmProjects/rsquarelabs-core/sbin/r2_gromacs.py'
+alias r2_server_start='python2.7 /home/rrmerugu/PycharmProjects/rsquarelabs-core/sbin/r2_server_start.py'
+
+```
+
+restart the terminal or do `source ~/.bashrc` to enable these commands for first time.
+
+
+## Starting the client server 
+
+
+Use the command `r2_server_start` to start the local client server, which is based on [bottle.py](http://bottlepy.org).
+It is accessible at [http://localhost:9090](http://localhost:9090)
 
 
 
