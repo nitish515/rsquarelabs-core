@@ -5,9 +5,18 @@
 [![codecov](https://codecov.io/gh/rsquarelabs/core-client/branch/dev/graph/badge.svg)](https://codecov.io/gh/rsquarelabs/core-client)
 [![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-![framework hero ](docs/_images/rsquarelabs-hero.jpg)
 
-This is the library of automation pipeline modules
+
+This is the core engine of automation pipeline and research tracking modules.
+
+
+
+![Homepage](docs/_images/demo/homepage.png)
+
+![Project View](docs/_images/demo/project-view.png)
+
+![Project Run View ](docs/_images/demo/run.png)
+
 
 [Website](http://rsquarelabs.com) |
 [Documentation](https://developers.rsquarelabs.com/core-client/) |
