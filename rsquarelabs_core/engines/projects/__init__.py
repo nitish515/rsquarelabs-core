@@ -26,12 +26,17 @@ class Project(object):
 
 
 
-    def save(self):
-        """
-        This saves a new project details like log files into database using sqlite3 query. Some other methods are integrated
-        into this method.
-        :return: Returns the project identification number which is created.
-        """
+
+    def save(self, *args, **kwargs):
+
+        # check if the project-key exist in db,
+        # check if the project-key exist in rsquareProjects
+        project_path = self.generate_path(slug=self.project_slug)
+        # project_config = kwargs.get('project_config', None)
+        # project_log = kwargs.get('project_log', None)
+
+        # PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_slug)
+
 
         project_path = self.generate_path(slug=self.project_slug)
 
@@ -78,6 +83,7 @@ class Project(object):
         return project_id
 
     def create_log(self, project_log=None, project_data=None, project_id=None):
+
         """
         Creates the log file for the project.
         :param project_log: Path for the project log file.
@@ -86,6 +92,7 @@ class Project(object):
         :return:
         """
         # print "----->4"
+
         fh_log = open(project_log, 'w', 0755)
         from random import randint
         project_create_details = project_data  # json.loads(project_data)
@@ -100,11 +107,13 @@ class Project(object):
         cprint(mesg, "green")
 
     def create_config(self, project_config=None):
+
         """
         Creates the configure file for the project.
         :param project_config: Path for the project config file.
         """
         # print "------>5"
+
         fh_config = open(project_config, 'w', 0755)
 
 
@@ -133,12 +142,14 @@ class Project(object):
 
 
     def generate_path(self, slug=None):
+
         """
         This generates the path for a project to be saved as project directory.
         :param slug: Slug of a project for naming the project directory.
         :return: Returns project path that as generated.
         """
         # print "------>2"
+
         if slug == None:
             slug = self.generate_slug()
 
@@ -154,15 +165,20 @@ class Project(object):
         return path
 
     def generate_slug(self):
+
         """
         This generates slug for a project.
         :return:Returns slug.
         """
         # print "----->3"
 
-        slug = self.project_title.replace(" ","-").replace("_","-")\
+        print "=-=-===============generaring slug"
+        print self.project_title
+
+
+        slug = self.project_title.rstrip().replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-')\
-                .replace(":","-").replace("--","-")
+                .replace(":","-").replace("--","-").lower()
 
 
         # if check db if exist:

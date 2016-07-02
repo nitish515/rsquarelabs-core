@@ -3,7 +3,7 @@
 
 
 The best way to contribute to the roadmap and feature discussions is by talking with the RSQUARELABS Team and 
-rsquarelabs-core Community in realtime through the Gitter chat, or by starting a [new issue](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) as a discussion thread.
+rsquarelabs-core Community in realtime through the Gitter chat, or by starting a [new issue](https://github.com/rsquarelabs/core-client/issues/new) as a discussion thread.
 
 - [Got a Question or Problem](#gaqp)
 - [Browsing the code](#code)
@@ -23,8 +23,8 @@ rsquarelabs-core Community in realtime through the Gitter chat, or by starting a
  
 ## <a name="gaqp"></a> Got a question or problem?
 
-Search for your question or problem in the [existing issues](https://github.com/rsquarelabs/rsquarelabs-core/issues) or 
-create a [new issue](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) to start a new discussion thread. 
+Search for your question or problem in the [existing issues](https://github.com/rsquarelabs/core-client/issues) or 
+create a [new issue](https://github.com/rsquarelabs/core-client/issues/new) to start a new discussion thread. 
 
 ## <a name="code"></a>Browsing the code?
 
@@ -60,10 +60,10 @@ If you'd like to implement a new feature, please consider opening an issue first
 ## <a name="contributing-to-the-project"></a>Contributing to the project
  
 
-1. Fork the `rsquarelabs/framework` repository! 
+1. Fork the `rsquarelabs/core-client` repository! 
 2. Clone the repository to your local machine. 
-3. Select an issue from [rsquarelabs/framework](https://github.com/rsquarelabs/rsquarelabs-core/issues?q=is%3Aopen) to work on or 
-[submit a proposal](https://github.com/rsquarelabs/rsquarelabs-core/issues/new) of your own.
+3. Select an issue from [rsquarelabs/framework](https://github.com/rsquarelabs/core-client/issues?q=is%3Aopen) to work on or 
+[submit a proposal](https://github.com/rsquarelabs/core-client/issues/new) of your own.
 4. Create a feature or hotfix, or fix  branch depending on the type of issue.
 5. Write the `tests` needed, take care of Python 2 & 3 compatibility issues. 
 6. Modify existing or add new `.md` files to the docs directory.
@@ -76,27 +76,10 @@ If you'd like to implement a new feature, please consider opening an issue first
 
 ### <a name="setting-dev-env"></a>Setting the Dev Env
 
-To start developing on rsquarelabs/framework, clone the repo:
-From the root of the repository:
+To start developing on rsquarelabs/core-client, see this section on 
+[Settings up the environment](../dev-guide/setting-environment.md)
 
-```bash
-# Clone the project
-git clone git@github.com:rsquarelabs/framework.git
-
-# Create the virtual environment
-virtualenv venv
-
-# Install requirements
-venv/bin/pip install -r requirements/dev-requirements.txt
-
-# Activate the environment
-source venv/bin/activate
-
-# Access the commands
-python sbin/r2_gromacs.py init # for gromacs module
-python sbin/r2_server_start # start the webclient in localhost
-
-```
+ 
 
 **Note:** You do not need a database or to run migrate.
 

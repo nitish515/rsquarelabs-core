@@ -10,7 +10,8 @@ CREATE TABLE projects
        log            TEXT,
        type           TEXT,
        date           TEXT,
-       is_delete      INT);
+       is_delete      INT,
+       description TEXT);
 CREATE TABLE project_activity
     ( id  INTEGER PRIMARY KEY     AUTOINCREMENT,
     tool_name TEXT NOT NULL,
@@ -48,7 +49,8 @@ CREATE TABLE runs
     log_file TEXT,
     w_dir TEXT,
     project_id INT NOT NULL,
-    class_name TEXT NOT NULL);
+    class_name TEXT NOT NULL,
+    run_description TEXT );
 CREATE TABLE protocols
     (protocol_id INTEGER PRIMARY KEY AUTOINCREMENT,
     protocol_name TEXT,

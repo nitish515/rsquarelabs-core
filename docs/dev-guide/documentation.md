@@ -8,8 +8,9 @@ This section explains how to document the modules inside this tool.
 To add a new page for the documentation, please follow the steps: 
 
 1. Create a page `some-page.md` in `docs/` ie., in the location `docs/some-page.md`. 
+Add in an appropriate section ie., `user-guide` or `dev-guide`.
 
-2. Add the page info to `mkdocs.yml` in the project root folder ie., `framework/mkdocs.yml`
+2. Add the page info to `mkdocs.yml` in the project root folder ie., `core-client/mkdocs.yml`
 ```
 - Dev Guides:
     - Environment Setup: developer/setting-environment.md
@@ -33,4 +34,6 @@ mkdocs gh-deploy --clean
 ```
 This will create a build in the folder `site` and push to the `gh-pages` branch.
 
-It will ask you for your github credentails, if you have permissions to push to the framework repository, it will generate a build and deploys it to the 
+It will ask you for your github credentails, if you have permissions to 
+push to the core-client repository, it will generate a build and deploys 
+it to the gh-pages branch

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Gromacs Documentation
 
 GROMACS is a software package for bio-molecules by performing very precise molecular dynamic simulations. We developed
@@ -329,3 +330,23 @@ def mdrun(self, step_no, input_name=None, nt=1, step_name="mdrun ", parent_metho
 
     self.logger.info("STEP%s: %s, completed. log written to %s " % (step_no, step_name, log_file))
 ```
+=======
+# Gromacs
+
+
+
+## Protocol Sample 
+
+
+For Gromacs 
+
+```
+import_files()
+write_ions_mdp()
+write_prod_mdp()
+create_topology()
+create_water_box()
+neutralize_system()
+minimize()
+```
+>>>>>>> 5a44461627866fb2e77352f45144cab3c3f82515

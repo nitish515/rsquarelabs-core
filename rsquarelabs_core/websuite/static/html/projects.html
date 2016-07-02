@@ -27,14 +27,14 @@
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
                       <tr>
-                        <th>Project ID</th>
-                        <th>Project Key</th>
-                        <th>Project Name</th>
-                        <th>Project Tags</th>
-                        <th>Project Email</th>
-                        <th>Project Type</th>
-                        <th>Project Path</th>
-                        <th>Project Start Date</th>
+                        <th> ID</th>
+                        <th> Key</th>
+                        <th> Name</th>
+                        <th> Tags</th>
+                        <th> Email</th>
+                        <th> Type</th>
+                        <!--<th> Path</th>-->
+                        <th> Start Date</th>
                         <th> Actions </th>
                       </tr>
                     </thead>
@@ -43,13 +43,13 @@
                     % for project in projects_list :
                         % if project[9] == 0:
                              <tr>
-                               <th><a href="/websuite/project/{{project[0]}}"> {{project[0]}}</a></th>
-                               <th>{{project[1]}}</th>
+                               <th>{{project[0]}}</th>
+                               <th><a href="/websuite/project/{{project[0]}}">{{project[1]}}</a></th>
                                <th>{{project[2]}}</th>
                                <th>{{project[3]}}</th>
                                <th>{{project[4]}}</th>
                                <th>{{project[5]}}</th>
-                               <th>{{project[6]}}</th>
+                               <!--<th>{{project[6]}}</th>-->
                                <th>{{project[8]}}</th>
                                <th><a href="/websuite/projects.html?backup_id={{project[0]}}" class="btn btn-primary" role="button"> Back up </a>
                                    <a href="/websuite/projects.html?delete_id={{project[0]}}" class="btn btn-danger" role="button"> Delete </a>

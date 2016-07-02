@@ -35,10 +35,10 @@
                         </div>
 
                         <div class="col-md-5">
-                            <label for="version">Protocol version: {{ new_version }}</label>
+
                             <input type="hidden" class="form-control" value="{{new_version}}" name="version" id="version">
 
-
+                            <label for="version">Project: </label>
                             <select name="project_id" class="form-control">
                                 %for project in projects_list:
                                     % if project[2] == 0:

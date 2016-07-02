@@ -4,7 +4,7 @@ import os, sys, subprocess
 from datetime import datetime
 from time import time
 import bottle as bottle2
-from bottle import Bottle, request, static_file, template, redirect, error
+from bottle import Bottle, request, static_file, template, redirect, error, response
 from yaml import dump, load
 
 
@@ -19,7 +19,7 @@ from rsquarelabs_core.utils import run_process
 from rsquarelabs_core.engines.db_engine import DBEngine
 from rsquarelabs_core.engines.projects import Project
 from rsquarelabs_core.config import RSQ_DB_PATH, RSQ_SCRIPT_PATH, RSQ_BACKUP_PATH,\
-    RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH
+    RSQ_PROJECTS_HOME, RSQ_EXPORT_PATH, RSQ_IMPORT_PATH, USER_HOME_FOLDER
 
 
 
@@ -44,7 +44,7 @@ logger.addHandler(handler)
 
 
 
-CORE_DIR = "/home/nitish/PycharmProjects/rsquarelabs-core"
+CORE_DIR = '"""+USER_HOME_FOLDER + """/PycharmProjects/rsquarelabs-core'
 # Path appended of rsquarelabs_core to sys for accessing modules inside rsquarelabs_core
 sys.path.append(CORE_DIR)
 
@@ -135,6 +135,9 @@ def automator():
                                                     (master_id,)).fetchone()
     new_version = db_object.do_select("SELECT MAX(version) from runs WHERE parent_run_id=?", (run_id, )).fetchone()[0]
 
+    print new_version
+    print type(new_version)
+
     # Updating the version after importing.
     if new_version != None:
         new_version = int(new_version) + 1
@@ -195,6 +198,8 @@ def automator_insert():
     project_id = request.forms.get("project_id")
     protocol_class_name = request.forms.get("protocol_class")
     receptor_file = request.forms.get("receptor_file")
+    print "-=-=-=-=-="
+    print version
 
     qs_string = request.query_string
     run_id = None
@@ -317,11 +322,13 @@ def protocols():
     """
     now = datetime.now().strftime(footer_timeformat)
 
+
     # Selects the whole list of protocols for listing on this page.
     protocol_list = db_object.do_select("select protocol_id, protocol_name, author, class, description, date from protocols", ()).fetchall()
 
+    protocol_created = request.get_cookie('protocol_created')
     content = open(os.path.join(HTML_DIR, 'protocols.html')).read()
-    return template(content,protocol_list=protocol_list,now=now)
+    return template(content,protocol_list=protocol_list,now=now, protocol_created= protocol_created)
 
 
 @app.route('/websuite/protocols/new.html')
@@ -334,7 +341,9 @@ def protocols_new():
 
     # This is for just creating new route "/websuite/protocols/new.html" and reads "new.html".
     content = open(os.path.join(HTML_DIR, 'new.html')).read()
-    return template(content, now=now)
+    protocol_created = request.get_cookie('protocol_created')
+    response.delete_cookie('protocol_created')
+    return template(content, now=now, protocol_created= protocol_created)
 
 
 @app.route('/websuite/protocols/new.html', method='POST')
@@ -354,6 +363,8 @@ def protocols_new():
     # Insert the master protocols into "protocols" table.
     db_object.do_insert("insert into protocols (protocol_name, class, protocol_data, description, author, date)\
      values (?, ?, ?, ?, ?, ?)", (name, "ProteinMin", data, description, author, datetime.now().strftime("%Y-%m-%d %H:%M"), ))
+
+    response.set_cookie('protocol_created', 'Protocol created Successfully')
 
     redirect('/websuite/protocols/new.html')
 
@@ -594,8 +605,8 @@ def projects_view(project_id):
     """
     now = datetime.now().strftime(footer_timeformat)
 
-    # Selects the project details using project id.
-    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date from projects where id = ?", (project_id, )).fetchone()
+    project_data = db_object.do_select("SELECT  id, slug, title, short_note, tags, user_email, type, path, log, config, date, description from projects where id = ?", (project_id, )).fetchone()
+
     #TODO = filter by project_id
     project_activity_data = db_object.do_select(
             "select id, tool_name, step_no, step_name, command, pid, project_id from project_activity where project_id = ? ORDER BY id DESC", (project_id,)).fetchall()
@@ -623,6 +634,11 @@ def projects_view(project_id):
     if "run_id=" in qs_string:
         run_id = qs_string.split('run_id=')[1].split('&')[0]
         print run_id
+
+    edit = False
+    if "edit=" in qs_string:
+        if  int(qs_string.split('edit=')[1].split('&')[0]) == 1:
+            edit = True
 
     if run_id !=None:
         yaml_file = os.path.join(RSQ_EXPORT_PATH, "export_%s_%s.yaml" % (project_id, run_id))
@@ -678,8 +694,37 @@ def projects_view(project_id):
         # Redirecting to make download it.
         redirect('/websuite/download/export_%s_%s.yaml' % (project_id, run_id))
 
+    project_updated_message = request.get_cookie('project_updated_message')
+    response.delete_cookie('project_updated_message')
     content = open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    return template(content, run_notes_list=run_notes_list, project_log=project_log, project_activity_data= project_activity_data[:5], project_config=project_config, project_data=project_data,runs_list=runs_list, now=now)
+    return template(content, run_notes_list=run_notes_list,
+                    project_log=project_log,
+                    project_activity_data= project_activity_data[:5],
+                    project_config=project_config, project_data=project_data,
+                    runs_list=runs_list, edit=edit,project_updated_message=project_updated_message, now=now)
+
+
+@app.route('/websuite/project/:project_id', method='POST')
+def projects_view_edit(project_id):
+
+
+    description = request.forms.get('description')
+    short_note = request.forms.get('short_note')
+    """
+    description and short_note are different forms, so we have to update them seperately
+    """
+
+    if description == '==':
+        " Now ignore description"
+        print "=update short note"
+        db_object.do_update("UPDATE projects SET short_note = ? WHERE id =?",
+                        (short_note, project_id))
+    if short_note == '==':
+        db_object.do_update("UPDATE projects SET description = ? WHERE id =?",
+                            (description, project_id))
+    response.set_cookie('project_updated_message', 'Project info updated Successfully')
+
+    redirect('/websuite/project/%s' %(project_id))
 
 
 @app.route('/websuite/runs/:run_id')
@@ -690,8 +735,15 @@ def run_veiw(run_id):
     :return:
     """
     now = datetime.now().strftime(footer_timeformat)
-    # Selecting the desired run's directory.
-    run_dir = db_object.do_select("select w_dir from runs where run_id=?", (run_id, )).fetchone()[0]
+
+    data = db_object.do_select("select w_dir, run_description, project_id from runs where run_id=?", (run_id, )).fetchone()
+
+    run_dir  = data[0]
+    run_description=data[1]
+    project_id =  data[2]
+
+    project_data = db_object.do_select("select id, title from projects where id= ?", (project_id,)).fetchone()
+
 
     # Making a list of files in that directory.
     file_list = os.listdir(run_dir)
@@ -707,6 +759,16 @@ def run_veiw(run_id):
     if "download_file=" in qs_string:
         download_file = qs_string.split('download_file=')[1].split('&')[0]
 
+
+    edit = False
+    if "edit" in qs_string:
+
+        if int(qs_string.split('edit=')[1].split('&')[0]) == 1:
+            edit = True
+
+    print edit
+
+
     # Downloads the desired file.
     if download_file != None:
         return static_file(download_file, root='%s' %(run_dir), download=download_file)
@@ -716,10 +778,17 @@ def run_veiw(run_id):
         (run_id,)).fetchall()
 
     content = open(os.path.join(HTML_DIR, 'run-view.html')).read()
+
+    note_insert_message = request.get_cookie('note_insert_message')
+    response.delete_cookie('note_insert_message')
     return template(content, file_list=file_list_filter,
                     run_id=run_id,
+                    note_insert_message = note_insert_message,
                     run_activity_data=run_activity_data[:5],
-                    now=now)
+                    run_description= run_description,
+                    now=now,
+                    edit= edit,
+                    project_data=project_data)
 
 
 
@@ -730,9 +799,14 @@ def run_veiw_notes(run_id):
     :param run_id: identification number of a run
     :return:
     """
-    run_notes = request.forms.get('run_notes')
-    # Submitting the notes and saves into "notes" table.
-    db_object.do_insert("INSERT INTO notes (note, run_id) values (?, ?)", (run_notes, run_id, ))
+
+    run_description = request.forms.get('run_description')
+    print run_description
+    db_object.do_update("UPDATE runs SET run_description = ? WHERE run_id =?",
+                        (run_description, run_id,))
+    response.set_cookie('note_insert_message', 'Run description updated Successfully')
+
+
     redirect('/websuite/runs/%s' %(run_id))
 
 # @app.route('/websuite/runs/:run_id')
