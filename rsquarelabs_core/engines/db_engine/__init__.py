@@ -39,6 +39,11 @@ class DBEngine:
 
 
     def do_connect(self, db_name):
+        """
+        This provides connection to the database.
+        :param db_name: Path to the database file
+        :return: Returns connection object to the database
+        """
         self.conn = sqlite3.connect(db_name)
         sql_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'schema.sql')
         tables_structure = open(sql_file_path).read()
@@ -53,11 +58,22 @@ class DBEngine:
         return self.conn
 
     def do_select(self, cmd, params):
-
+        """
+        This provides data which is selected from database using given parameters.
+        :param cmd: command (query) as a string for selecting.
+        :param params: Constraint parameters for selecting data.
+        :return: The selected data returned as a tuple.
+        """
         data = self.cur.execute(cmd, params)
         return data
 
     def do_insert(self, cmd, params):
+        """
+        This provides cursor for inserting the data into database using parameters.
+        :param cmd: command (query) as a string for insertion.
+        :param params: Constraint parameters for insertion data.
+        :return: Returns cursor object which is inserted the data into database.
+        """
         try:
             self.cur.execute(cmd, params)
             self.conn.commit()
@@ -67,6 +83,12 @@ class DBEngine:
         return self.cur
 
     def do_update(self, cmd, params):
+        """
+        This provides cursor for updating the data into database using parameters.
+        :param cmd: command (query) as a string for updating.
+        :param params: Constraint parameters for updating data.
+        :return: Returns cursor object which is updated the data into database.
+        """
         try:
             self.cur.execute(cmd, params)
             self.conn.commit()

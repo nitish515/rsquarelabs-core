@@ -1,9 +1,10 @@
-from rsquarelabs_core.config import RSQ_PROJECTS_HOME, RSQ_DB_PATH
 import os
-from rsquarelabs_core.engines.db_engine import DBEngine
 from datetime import datetime
 from time import time
 from termcolor import cprint
+from rsquarelabs_core.config import RSQ_PROJECTS_HOME, RSQ_DB_PATH
+from rsquarelabs_core.engines.db_engine import DBEngine
+
 
 __VERSION__ = "0.1dev"
 
@@ -25,26 +26,17 @@ class Project(object):
 
 
 
-    def save(self, *args, **kwargs):
-        print "----->1"
-        # check if the project-key exist in db,
-        # check if the project-key exist in rsquareProjects
+    def save(self):
+        """
+        This saves a new project details like log files into database using sqlite3 query. Some other methods are integrated
+        into this method.
+        :return: Returns the project identification number which is created.
+        """
+
         project_path = self.generate_path(slug=self.project_slug)
-        # project_config = kwargs.get('project_config', None)
-        # project_log = kwargs.get('project_log', None)
-
-        # PROJECT_PATH = os.path.join(RSQ_PROJECTS_HOME, project_slug)
-
-        # if os.path.exists(PROJECT_PATH):
-        #     #print "ERROR: Project name already exists"
-        #     os.rmdir(PROJECT_PATH)
-        #     os.mkdir(PROJECT_PATH, 0755)
-        # else:
-        #     os.mkdir(PROJECT_PATH, 0755)
 
         project_type ="r2_gromacs"
         project_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-        # project_path = PROJECT_PATH
         project_log = os.path.join(project_path, 'r2_gromacs.log')
         project_config = os.path.join(project_path, 'r2_gromacs.config')
 
@@ -79,14 +71,21 @@ class Project(object):
         # return cur
         project_id = db_object.cur.lastrowid
 
-        print project_id
+        # print project_id
         self.create_log(project_log=project_log, project_data=project_data, project_id=project_id)
         self.create_config(project_config=project_config)
 
         return project_id
 
     def create_log(self, project_log=None, project_data=None, project_id=None):
-        print "----->4"
+        """
+        Creates the log file for the project.
+        :param project_log: Path for the project log file.
+        :param project_data: Data regarding on project for the log file.
+        :param project_id: Project identification number for the log file.
+        :return:
+        """
+        # print "----->4"
         fh_log = open(project_log, 'w', 0755)
         from random import randint
         project_create_details = project_data  # json.loads(project_data)
@@ -94,20 +93,28 @@ class Project(object):
         fh_log.write(
             "# RSQUARELABS-CORE v%s \n# Written by Ravi RT Merugu \n# https://github.com/rsquarelabs/rsquarelabs-core\n\n\n" % __VERSION__)
 
-        mesg = """============================================
-    Project created with id '%s',
-    ============================================""" % project_id
+        mesg = """                  ============================================
+                        Project created with id '%s',
+                  ============================================""" % project_id
         # fh_config.write(cur.lastrowid)
         cprint(mesg, "green")
 
     def create_config(self, project_config=None):
-        print "------>5"
+        """
+        Creates the configure file for the project.
+        :param project_config: Path for the project config file.
+        """
+        # print "------>5"
         fh_config = open(project_config, 'w', 0755)
 
 
 
     def save_run(self, *args, **kwargs):
-
+        """
+        This saves run of a project into database.
+        :param kwargs: credentials required for saving run into database.
+        :return: Returns run's identification number of a project.
+        """
         run_name = kwargs.get('run_name', "Default")
         version = kwargs.get('version', '1')
         parent_run_id = kwargs.get('parent_run_id', '0')
@@ -126,7 +133,12 @@ class Project(object):
 
 
     def generate_path(self, slug=None):
-        print "------>2"
+        """
+        This generates the path for a project to be saved as project directory.
+        :param slug: Slug of a project for naming the project directory.
+        :return: Returns project path that as generated.
+        """
+        # print "------>2"
         if slug == None:
             slug = self.generate_slug()
 
@@ -142,7 +154,11 @@ class Project(object):
         return path
 
     def generate_slug(self):
-        print "----->3"
+        """
+        This generates slug for a project.
+        :return:Returns slug.
+        """
+        # print "----->3"
 
         slug = self.project_title.replace(" ","-").replace("_","-")\
                 .replace("/","-").replace("\\","-").replace(".","-").replace(",","-").replace(";",'-')\

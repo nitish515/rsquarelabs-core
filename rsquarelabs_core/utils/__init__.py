@@ -92,7 +92,7 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
 
         elif "<<" in command:
             """
-            #ignore <<,  because thhis is given when user input needs to be provided
+            #ignore <<,  because this is given when user input needs to be provided
             """
             extra = " << %s"% command.split("<<")[1].rstrip()
             command = command.split("<<")[0].rstrip()
@@ -143,7 +143,7 @@ def run_and_record_process(step_no, step_name, command, tool_name, log_file, pro
         logger.info("Runing the stepNo: %s, StepName: %s with process id %s"%(step_no, step_name, process.pid))
         ret = process.poll()
 
-        print "id of data insertion ",cur.lastrowid
+        print "id of data insertion ", last_run_id
 
         if process.pid is not None:
             # db_object.conn.execute("UPDATE project_activity SET pid =? where id=? ", (process.pid, cur.lastrowid))

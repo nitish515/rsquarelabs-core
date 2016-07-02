@@ -19,6 +19,8 @@ pages:
 - Dev Guide:
     - Project : dev-guide/modules/project.md
     - Gromacs : dev-guide/modules/gromacs.md
+    - Websuite : dev-guide/modules/websuite.md
+    - DBEngine : dev-guide/modules/db_engine.md
     - Documentation : dev-guide/documentation.md
     - Environment Setup: dev-guide/setting-environment.md
 

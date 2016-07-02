@@ -1,11 +1,10 @@
-import shutil, argparse, sys, os, inspect
+import shutil, argparse, sys, os
 from rsquarelabs_core.utils import run_process, get_file_info, import_files
 from core.messages import welcome_message, backup_folder_already_exists, \
-    write_em_mpd_data, create_em_mdp_data
+    write_em_mpd_data, create_em_mdp_data, ions_mdp, minim_mdp
 from core import settings
 from rsquarelabs_core.engines.db_engine import DBEngine, RSQ_DB_PATH
 from rsquarelabs_core.engines.gromacs import Gromacs
-from core.messages import  write_em_mpd_data, create_em_mdp_data, ions_mdp, minim_mdp
 import logging
 """
 This module aimed at writing python wrapper around the tool Gromacs(www.gromacs.org) - a molecular dynamics package used
@@ -40,12 +39,13 @@ class ProteinMin(Gromacs):
         protein_file_formats = ['.gro','.pdb']
         protein_file_path = self.receptor_file_path
 
+        #Checking protein_file path exists as in given format or not. If does not exists, then enter the valid path.
         while not os.path.isfile(protein_file_path):
             protein_file_path = raw_input("Enter the path for protein file : ")
             for format in protein_file_formats:
                 if protein_file_path.endswith(format) and os.path.isfile(protein_file_path):
                     break
-        import_files(protein_file_path, self.working_dir, self.project_id, self.run_id )
+        import_files(protein_file_path, self.working_dir, self.project_id, self.run_id)
 
     def write_ions_mdp(self):
         """
