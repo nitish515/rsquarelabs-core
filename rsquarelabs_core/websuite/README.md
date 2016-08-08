@@ -23,7 +23,7 @@ def myown_file():
     
     # get the file content from HTML_DIR(rsquarelabs-core/websuite/static/html/) 
     content =  open(os.path.join(HTML_DIR, 'myown-file.html')).read()
-    # now = now helps to print the timestamp when the page is executed by server. it appears on the footer of page.
+    # now = now helps to print the timestamp when the page is executed by server. 
     return template(content, now=now)    
 
 
@@ -36,7 +36,7 @@ def projects_view(project_id):
     
     # get the file content from HTML_DIR(rsquarelabs-core/websuite/static/html/) 
     content =  open(os.path.join(HTML_DIR, 'project-view.html')).read()
-    # now = now helps to print the timestamp when the page is executed by server. it appears on the footer of page.
+    # now = now helps to print the timestamp when the page is executed by server. 
     return template(content, now=now)    
 
 ```
